@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>拾句 — 書摘回顧</title>
+<meta name="theme-color" content="#1B3247">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="拾句">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F5F4; --card:#FCFDFC;
+  --ink:#17242F; --ink-soft:#4A5B68;
+  --indigo:#2C4A63; --indigo-deep:#1B3247;
+  --mist:#D4DDE0; --shu:#C4462B;
+  --radius:14px;
+  --serif:'Noto Serif TC',serif;
+  --sans:'Noto Sans TC',-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--sans);background:var(--paper);color:var(--ink);
+  font-size:16px;line-height:1.6;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+}
+header{
+  padding:calc(16px + env(safe-area-inset-top)) 20px 12px;
+  display:flex;align-items:baseline;justify-content:space-between;
+}
+header h1{font-family:var(--serif);font-weight:700;font-size:26px;letter-spacing:.12em;color:var(--indigo-deep)}
+header h1 span{font-size:12px;letter-spacing:.28em;color:var(--ink-soft);font-family:var(--sans);font-weight:500;margin-left:10px}
+#userchip{font-size:12px;color:var(--ink-soft);cursor:pointer;background:none;border:none;font-family:var(--sans)}
+main{padding:0 16px;max-width:640px;margin:0 auto}
+.hidden{display:none!important}
+
+/* ---- 登入畫面 ---- */
+#view-login{text-align:center;padding-top:12vh}
+#view-login .mark{
+  width:88px;height:88px;margin:0 auto 22px;border-radius:20px;
+  background:var(--indigo-deep);color:var(--paper);
+  font-family:var(--serif);font-weight:700;font-size:44px;
+  display:flex;align-items:center;justify-content:center;position:relative;
+}
+#view-login .mark::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--indigo);border-radius:20px 0 0 20px}
+#view-login h2{font-family:var(--serif);font-size:20px;color:var(--indigo-deep);margin-bottom:8px}
+#view-login p{font-size:14px;color:var(--ink-soft);margin-bottom:28px}
+#login-btn{
+  font-family:var(--sans);font-size:15px;font-weight:500;
+  padding:13px 28px;border-radius:12px;cursor:pointer;
+  border:none;background:var(--indigo-deep);color:#fff;
+}
+#login-hint{font-size:12px;color:var(--ink-soft);margin-top:18px;line-height:1.8}
+
+/* ---- Tab bar ---- */
+nav{
+  position:fixed;left:0;right:0;bottom:0;
+  background:rgba(252,253,252,.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--mist);
+  display:flex;justify-content:space-around;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:50;
+}
+nav button{flex:1;background:none;border:none;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--ink-soft);padding:8px 0 6px;cursor:pointer;border-radius:10px}
+nav button .ic{display:block;font-size:19px;line-height:1.2;font-family:var(--serif)}
+nav button.on{color:var(--indigo-deep)}
+nav button.on .ic{color:var(--shu)}
+nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+
+/* ---- 回顧卡片 ---- */
+.review-head{display:flex;justify-content:space-between;align-items:center;margin:6px 2px 14px}
+.review-head .date{font-size:13px;color:var(--ink-soft);letter-spacing:.06em}
+.review-head .count{font-size:13px;color:var(--indigo);font-weight:500}
+.qcard{
+  position:relative;background:var(--card);border:1px solid var(--mist);
+  border-radius:var(--radius);padding:26px 24px 22px 34px;margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(27,50,71,.06);
+}
+.qcard .spine{position:absolute;left:0;top:0;bottom:0;width:14px;border-radius:var(--radius) 0 0 var(--radius);background:var(--indigo)}
+.qcard .vtag{position:absolute;left:16px;top:24px;writing-mode:vertical-rl;font-size:11px;letter-spacing:.24em;color:var(--indigo);max-height:70%;overflow:hidden;white-space:nowrap}
+.qcard blockquote{font-family:var(--serif);font-size:19px;line-height:1.9;color:var(--ink);margin-bottom:16px;white-space:pre-wrap}
+.qcard .src{font-size:13px;color:var(--ink-soft)}
+.qcard .src b{color:var(--indigo-deep)}
+.qcard .note{margin-top:12px;padding:10px 12px;background:var(--paper);border-radius:8px;font-size:14px;color:var(--ink-soft);white-space:pre-wrap}
+.qcard .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11px;letter-spacing:.05em;color:var(--indigo);border:1px solid var(--mist);border-radius:999px;padding:2px 10px}
+.seal{
+  position:absolute;right:18px;top:18px;width:40px;height:40px;
+  border:2px solid var(--shu);border-radius:6px;color:var(--shu);
+  font-family:var(--serif);font-weight:700;font-size:12px;line-height:1.15;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  transform:rotate(-4deg);opacity:.85;
+}
+.qactions{display:flex;gap:10px;margin-bottom:22px}
+.btn{
+  flex:1;font-family:var(--sans);font-size:15px;font-weight:500;
+  padding:12px 0;border-radius:12px;cursor:pointer;
+  border:1px solid var(--mist);background:var(--card);color:var(--indigo-deep);
+}
+.btn.primary{background:var(--indigo-deep);border-color:var(--indigo-deep);color:#fff}
+.btn.fav{flex:0 0 52px}
+.btn.fav.on{color:var(--shu);border-color:var(--shu)}
+.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.done-banner{text-align:center;padding:56px 20px}
+.done-banner .stamp{
+  width:74px;height:74px;margin:0 auto 18px;
+  border:3px solid var(--shu);border-radius:10px;color:var(--shu);
+  font-family:var(--serif);font-weight:700;font-size:20px;
+  display:flex;align-items:center;justify-content:center;transform:rotate(-5deg);
+}
+.done-banner p{color:var(--ink-soft);font-size:14px;margin-top:6px}
+
+/* ---- 書庫 ---- */
+.searchbar{display:flex;gap:8px;margin-bottom:14px}
+.searchbar input{flex:1;font-family:var(--sans);font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card);color:var(--ink)}
+.searchbar input:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.group-title{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--indigo-deep);margin:20px 2px 10px;display:flex;justify-content:space-between;align-items:baseline}
+.group-title small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--ink-soft)}
+.lcard{background:var(--card);border:1px solid var(--mist);border-radius:12px;padding:16px 16px 12px;margin-bottom:10px}
+.lcard blockquote{font-family:var(--serif);font-size:15.5px;line-height:1.85;margin-bottom:8px;white-space:pre-wrap}
+.lcard .lnote{margin:0 0 8px;padding:8px 10px;background:var(--paper);border-radius:8px;font-size:13px;color:var(--ink-soft);white-space:pre-wrap}
+.lcard .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-soft)}
+.lcard .meta .ops{display:flex;gap:14px}
+.lcard .meta button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--indigo);font-family:var(--sans);padding:4px 0}
+.lcard .meta button.danger{color:var(--shu)}
+.empty{text-align:center;padding:64px 24px;color:var(--ink-soft)}
+.empty .glyph{font-family:var(--serif);font-size:40px;color:var(--mist);margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.8}
+
+/* ---- 表單 ---- */
+form label{display:block;font-size:13px;font-weight:500;color:var(--ink-soft);margin:16px 2px 6px}
+form input,form textarea{width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);padding:12px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card)}
+form textarea{resize:vertical;min-height:110px;font-family:var(--serif);line-height:1.8}
+form input:focus,form textarea:focus{outline:2px solid var(--indigo);outline-offset:1px}
+form .submit{width:100%;margin-top:22px;padding:14px 0}
+
+/* ---- 匯出 ---- */
+.export-box{background:var(--card);border:1px solid var(--mist);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.export-box h3{font-family:var(--serif);font-size:16px;color:var(--indigo-deep);margin-bottom:6px}
+.export-box p{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+
+.toast{
+  position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));
+  transform:translateX(-50%) translateY(8px);
+  background:var(--indigo-deep);color:#fff;font-size:13px;
+  padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;z-index:60;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>拾句<span>SHIJU · 書摘回顧</span></h1>
+  <button id="userchip" class="hidden" title="點擊登出"></button>
+</header>
+
+<main>
+  <!-- 登入 -->
+  <section id="view-login">
+    <div class="mark">拾</div>
+    <h2>拾句 · 書摘回顧</h2>
+    <p>用 Google 帳號登入,<br>iPhone 與 iPad 的書摘會自動同步。</p>
+    <button id="login-btn">使用 Google 登入</button>
+    <div id="login-hint"></div>
+  </section>
+
+  <!-- 今日回顧 -->
+  <section id="view-review" class="hidden">
+    <div class="review-head">
+      <div class="date" id="today-date"></div>
+      <div class="count" id="review-progress"></div>
+    </div>
+    <div id="review-stage"></div>
+  </section>
+
+  <!-- 書庫 -->
+  <section id="view-library" class="hidden">
+    <div class="searchbar">
+      <input id="search" type="search" placeholder="搜尋內容、出處、標籤…" aria-label="搜尋書摘">
+    </div>
+    <div id="library-list"></div>
+  </section>
+
+  <!-- 新增 -->
+  <section id="view-add" class="hidden">
+    <form id="add-form" onsubmit="return false">
+      <label for="f-quote">摘錄內容 *</label>
+      <textarea id="f-quote" required placeholder="貼上或輸入你想留下的句子…"></textarea>
+      <label for="f-source">出處(書名/文章)*</label>
+      <input id="f-source" required placeholder="例:愛的藝術">
+      <label for="f-author">作者</label>
+      <input id="f-author" placeholder="例:Erich Fromm">
+      <label for="f-note">我的筆記</label>
+      <textarea id="f-note" style="min-height:70px;font-family:var(--sans)" placeholder="這句話為什麼重要?"></textarea>
+      <label for="f-tags">標籤(逗號分隔)</label>
+      <input id="f-tags" placeholder="例:設計, 哲學, IELTS">
+      <button type="button" class="btn primary submit" id="save-btn">存入書庫</button>
+    </form>
+  </section>
+
+  <!-- 匯出 -->
+  <section id="view-export" class="hidden">
+    <div class="export-box">
+      <h3>Markdown</h3>
+      <p>依出處分組,可直接貼到 Notion 或 Obsidian。</p>
+      <button class="btn" id="copy-md">複製 Markdown</button>
+    </div>
+    <div class="export-box">
+      <h3>JSON 備份</h3>
+      <p>完整資料備份,可自行處理或保存。</p>
+      <button class="btn" id="copy-json">複製 JSON</button>
+    </div>
+    <div class="export-box">
+      <h3>統計</h3>
+      <p id="stats">—</p>
+    </div>
+  </section>
+</main>
+
+<nav id="tabbar" class="hidden" aria-label="主選單">
+  <button data-view="review" class="on"><span class="ic">今</span>今日回顧</button>
+  <button data-view="library"><span class="ic">庫</span>書庫</button>
+  <button data-view="add"><span class="ic">拾</span>新增</button>
+  <button data-view="export"><span class="ic">出</span>匯出</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCUgEu1PzpDRppnFqvytiq7A1Jk4auFNjY",
+  authDomain: "shiju-e9049.firebaseapp.com",
+  projectId: "shiju-e9049",
+  storageBucket: "shiju-e9049.firebasestorage.app",
+  messagingSenderId: "254001497356",
+  appId: "1:254001497356:web:ecedb3b8305cf8e58e7529",
+  measurementId: "G-5P10SM2ERX"
+};
+
+/* ================================================================ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+let db;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+  });
+} catch (e) {
+  const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  db = getFirestore(app);
+}
+
+/* ---------- 狀態 ---------- */
+let USER = null;
+let HL = [];                 // highlights(由 onSnapshot 即時更新)
+let META = { reviewLog: {} };
+let dailyIdx = 0;
+let editingId = null;
+let unsubHL = null, unsubMeta = null;
+let currentView = 'review';
+
+const $ = s => document.querySelector(s);
+const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+
+/* ---------- 登入/登出 ---------- */
+const provider = new GoogleAuthProvider();
+$('#login-btn').onclick = async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    // iOS 全螢幕模式(加入主畫面)偶爾擋 popup → 改走 redirect
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+      try { await signInWithRedirect(auth, provider); }
+      catch (e2) { $('#login-hint').textContent = '登入失敗:' + e2.message; }
+    } else if (e.code === 'auth/unauthorized-domain') {
+      $('#login-hint').textContent = '這個網域尚未授權。請到 Firebase Console → Authentication → Settings → Authorized domains,加入目前的網址網域。';
+    } else {
+      $('#login-hint').textContent = '登入失敗:' + e.message;
+    }
+  }
+};
+getRedirectResult(auth).catch(() => {});
+$('#userchip').onclick = async () => {
+  if (confirm('登出?')) { await signOut(auth); }
+};
+
+onAuthStateChanged(auth, user => {
+  USER = user;
+  if (user) {
+    $('#view-login').classList.add('hidden');
+    $('#tabbar').classList.remove('hidden');
+    $('#userchip').classList.remove('hidden');
+    $('#userchip').textContent = user.displayName || user.email;
+    subscribe();
+    switchView('review');
+  } else {
+    if (unsubHL) unsubHL(); if (unsubMeta) unsubMeta();
+    HL = []; META = { reviewLog: {} };
+    $('#tabbar').classList.add('hidden');
+    $('#userchip').classList.add('hidden');
+    ['review', 'library', 'add', 'export'].forEach(v => $('#view-' + v).classList.add('hidden'));
+    $('#view-login').classList.remove('hidden');
+  }
+});
+
+/* ---------- Firestore 即時訂閱 ---------- */
+function subscribe() {
+  const base = 'users/' + USER.uid;
+  unsubHL = onSnapshot(collection(db, base, 'highlights'), snap => {
+    HL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    HL.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    rerender();
+  }, err => toast('讀取失敗:' + err.code));
+  unsubMeta = onSnapshot(doc(db, base, 'meta', 'state'), snap => {
+    META = snap.exists() ? snap.data() : { reviewLog: {} };
+    if (!META.reviewLog) META.reviewLog = {};
+    rerender();
+  });
+}
+function rerender() {
+  if (currentView === 'review') renderReview();
+  if (currentView === 'library') renderLibrary();
+  if (currentView === 'export') renderExport();
+}
+
+async function saveMeta() {
+  // 只保留最近 90 天的回顧紀錄,避免文件無限長大
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+  const co = cutoff.toISOString().slice(0, 10);
+  for (const k of Object.keys(META.reviewLog)) if (k < co) delete META.reviewLog[k];
+  await setDoc(doc(db, 'users', USER.uid, 'meta', 'state'), META);
+}
+
+/* ---------- 今日回顧 ---------- */
+function seededRand(seed) { return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; }
+function buildDailyPick() {
+  const seed = parseInt(todayStr().replace(/-/g, ''), 10);
+  const rnd = seededRand(seed);
+  const pool = [...HL].sort((a, b) => (a.reviews || 0) - (b.reviews || 0) || rnd() - 0.5);
+  return pool.slice(0, Math.min(5, pool.length));
+}
+function renderReview() {
+  const t = todayStr();
+  const d = new Date();
+  $('#today-date').textContent = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 週' + '日一二三四五六'[d.getDay()];
+  const stage = $('#review-stage');
+  if (HL.length === 0) {
+    $('#review-progress').textContent = '';
+    stage.innerHTML = '<div class="empty"><div class="glyph">拾</div><p>書庫還是空的。<br>到「新增」放進第一句你想反覆重讀的話。</p></div>';
+    return;
+  }
+  const pick = buildDailyPick();
+  const done = (META.reviewLog[t] && META.reviewLog[t].done) || [];
+  dailyIdx = pick.findIndex(h => !done.includes(h.id));
+  if (dailyIdx < 0) dailyIdx = pick.length;
+  $('#review-progress').textContent = '今日 ' + Math.min(done.length, pick.length) + ' / ' + pick.length;
+  if (dailyIdx >= pick.length) {
+    stage.innerHTML = '<div class="done-banner"><div class="stamp">回顧<br>畢</div><div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--indigo-deep)">今日回顧完成</div><p>連續回顧 ' + calcStreak() + ' 天。明天會有新的一組句子。</p></div>';
+    return;
+  }
+  const h = pick[dailyIdx];
+  stage.innerHTML = `
+    <article class="qcard">
+      <div class="spine"></div>
+      <div class="vtag">${esc(h.source)}</div>
+      <div class="seal">${(h.reviews || 0)}<br>回</div>
+      <blockquote>${esc(h.quote)}</blockquote>
+      <div class="src"><b>${esc(h.source)}</b>${h.author ? ' · ' + esc(h.author) : ''}</div>
+      ${h.note ? '<div class="note">' + esc(h.note) + '</div>' : ''}
+      ${h.tags && h.tags.length ? '<div class="tags">' + h.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : ''}
+    </article>
+    <div class="qactions">
+      <button class="btn fav ${h.fav ? 'on' : ''}" id="fav-btn" aria-label="收藏">${h.fav ? '♥' : '♡'}</button>
+      <button class="btn primary" id="next-btn">已讀,下一句</button>
+    </div>`;
+  $('#next-btn').onclick = async () => {
+    try {
+      if (!META.reviewLog[t]) META.reviewLog[t] = { done: [] };
+      if (!META.reviewLog[t].done.includes(h.id)) META.reviewLog[t].done.push(h.id);
+      await updateDoc(doc(db, 'users', USER.uid, 'highlights', h.id), { reviews: (h.reviews || 0) + 1, lastReviewed: t });
+      await saveMeta();
+    } catch (e) { toast('儲存失敗,請重試'); }
+  };
+  $('#fav-btn').onclick = async () => {
+    try { await updateDoc(doc(db, 'users', USER.uid, 'highlights', h.id), { fav: !h.fav }); }
+    catch (e) { toast('儲存失敗,請重試'); }
+  };
+}
+function calcStreak() {
+  let n = 0; const d = new Date();
+  for (;;) {
+    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    if (META.reviewLog[k] && META.reviewLog[k].done.length > 0) { n++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
+  return n;
+}
+
+/* ---------- 書庫 ---------- */
+function renderLibrary() {
+  const q = ($('#search').value || '').trim().toLowerCase();
+  const list = $('#library-list');
+  let items = HL;
+  if (q) items = items.filter(h =>
+    (h.quote || '').toLowerCase().includes(q) ||
+    (h.source || '').toLowerCase().includes(q) ||
+    (h.author || '').toLowerCase().includes(q) ||
+    (h.note || '').toLowerCase().includes(q) ||
+    (h.tags || []).some(t => t.toLowerCase().includes(q)));
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="glyph">庫</div><p>' + (q ? '找不到符合的書摘。' : '書庫還是空的,從「新增」開始。') + '</p></div>';
+    return;
+  }
+  const groups = {};
+  items.forEach(h => { (groups[h.source] = groups[h.source] || []).push(h); });
+  list.innerHTML = Object.keys(groups).sort().map(src => {
+    const g = groups[src];
+    return '<div class="group-title">' + esc(src) + '<small>' + g.length + ' 則</small></div>' +
+      g.map(h => `
+      <div class="lcard">
+        <blockquote>${esc(h.quote)}</blockquote>
+        ${h.note ? '<div class="lnote">' + esc(h.note) + '</div>' : ''}
+        <div class="meta">
+          <span>${h.fav ? '♥ ' : ''}回顧 ${(h.reviews || 0)} 次${h.tags && h.tags.length ? ' · ' + h.tags.map(esc).join('、') : ''}</span>
+          <span class="ops">
+            <button data-edit="${h.id}">編輯</button>
+            <button data-del="${h.id}" class="danger">刪除</button>
+          </span>
+        </div>
+      </div>`).join('');
+  }).join('');
+  list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (confirm('確定刪除這則書摘?')) {
+      try { await deleteDoc(doc(db, 'users', USER.uid, 'highlights', b.dataset.del)); toast('已刪除'); }
+      catch (e) { toast('刪除失敗,請重試'); }
+    }
+  });
+  list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
+    const h = HL.find(x => x.id === b.dataset.edit);
+    if (!h) return;
+    editingId = h.id;
+    $('#f-quote').value = h.quote; $('#f-source').value = h.source;
+    $('#f-author').value = h.author || ''; $('#f-note').value = h.note || '';
+    $('#f-tags').value = (h.tags || []).join(', ');
+    $('#save-btn').textContent = '更新書摘';
+    switchView('add');
+  });
+}
+
+/* ---------- 新增/編輯 ---------- */
+$('#save-btn').onclick = async () => {
+  const quote = $('#f-quote').value.trim(), source = $('#f-source').value.trim();
+  if (!quote || !source) { toast('請填寫摘錄內容與出處'); return; }
+  const tags = $('#f-tags').value.split(/[,,、]/).map(s => s.trim()).filter(Boolean);
+  const data = {
+    quote, source,
+    author: $('#f-author').value.trim(),
+    note: $('#f-note').value.trim(),
+    tags
+  };
+  try {
+    if (editingId) {
+      await updateDoc(doc(db, 'users', USER.uid, 'highlights', editingId), data);
+      toast('已更新');
+    } else {
+      await setDoc(doc(db, 'users', USER.uid, 'highlights', uid()), {
+        ...data, reviews: 0, fav: false, created: todayStr(), createdAt: serverTimestamp()
+      });
+      toast('已存入書庫');
+    }
+    editingId = null;
+    $('#add-form').querySelectorAll('input,textarea').forEach(el => el.value = '');
+    $('#save-btn').textContent = '存入書庫';
+    switchView('library');
+  } catch (e) { toast('儲存失敗:' + e.code); }
+};
+
+/* ---------- 匯出 ---------- */
+function toMarkdown() {
+  const groups = {};
+  HL.forEach(h => { (groups[h.source] = groups[h.source] || []).push(h); });
+  return Object.keys(groups).sort().map(src => {
+    const g = groups[src];
+    let md = '## ' + src + (g[0].author ? ' — ' + g[0].author : '') + '\n\n';
+    g.forEach(h => {
+      md += '> ' + h.quote.replace(/\n/g, '\n> ') + '\n\n';
+      if (h.note) md += '筆記:' + h.note + '\n\n';
+      if (h.tags && h.tags.length) md += '標籤:' + h.tags.map(t => '#' + t).join(' ') + '\n\n';
+    });
+    return md;
+  }).join('---\n\n') || '(尚無書摘)';
+}
+async function copyText(txt, msg) {
+  try { await navigator.clipboard.writeText(txt); toast(msg); }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); toast(msg);
+  }
+}
+$('#copy-md').onclick = () => copyText(toMarkdown(), 'Markdown 已複製');
+$('#copy-json').onclick = () => copyText(JSON.stringify({ highlights: HL, meta: META }, null, 2), 'JSON 已複製');
+function renderExport() {
+  const n = HL.length;
+  const srcs = new Set(HL.map(h => h.source)).size;
+  const rv = HL.reduce((s, h) => s + (h.reviews || 0), 0);
+  $('#stats').textContent = n + ' 則書摘 · ' + srcs + ' 個出處 · 累計回顧 ' + rv + ' 次 · 連續 ' + calcStreak() + ' 天';
+}
+
+/* ---------- 分頁切換 ---------- */
+function switchView(v) {
+  currentView = v;
+  ['review', 'library', 'add', 'export'].forEach(x => {
+    $('#view-' + x).classList.toggle('hidden', x !== v);
+    document.querySelector('nav [data-view="' + x + '"]').classList.toggle('on', x === v);
+  });
+  rerender();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => switchView(b.dataset.view));
+$('#search').addEventListener('input', renderLibrary);
+</script>
+</body>
+</html>
