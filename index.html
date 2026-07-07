@@ -89,6 +89,8 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .qcard .note{margin-top:12px;padding:10px 12px;background:var(--paper);border-radius:8px;font-size:14px;color:var(--ink-soft);white-space:pre-wrap}
 .qcard .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
 .tag{font-size:11px;letter-spacing:.05em;color:var(--indigo);border:1px solid var(--mist);border-radius:999px;padding:2px 10px}
+.srclink{margin-top:8px}
+.srclink a{font-size:12px;color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--mist)}
 .seal{
   position:absolute;right:18px;top:18px;width:40px;height:40px;
   border:2px solid var(--shu);border-radius:6px;color:var(--shu);
@@ -279,6 +281,30 @@ let dailyIdx = 0;
 let editingId = null;
 let unsubHL = null, unsubMeta = null;
 let currentView = 'review';
+let capturedUrl = '';
+
+/* ---------- 分享擷取(iOS 捷徑用) ---------- */
+const _params = new URLSearchParams(location.search);
+let pendingCapture = null;
+if (_params.get('quote')) {
+  pendingCapture = {
+    quote: _params.get('quote') || '',
+    source: _params.get('source') || _params.get('title') || '',
+    url: _params.get('url') || ''
+  };
+  history.replaceState(null, '', location.pathname);
+}
+function applyPendingCapture() {
+  if (!pendingCapture) return;
+  editingId = null;
+  $('#f-quote').value = pendingCapture.quote;
+  $('#f-source').value = pendingCapture.source;
+  capturedUrl = pendingCapture.url;
+  pendingCapture = null;
+  $('#save-btn').textContent = '存入書庫';
+  switchView('add');
+  toast('已帶入摘錄,確認出處後存檔');
+}
 
 const $ = s => document.querySelector(s);
 const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
@@ -317,6 +343,7 @@ onAuthStateChanged(auth, user => {
     $('#userchip').textContent = user.displayName || user.email;
     subscribe();
     switchView('review');
+    applyPendingCapture();
   } else {
     if (unsubHL) unsubHL(); if (unsubMeta) unsubMeta();
     HL = []; META = { reviewLog: {} };
@@ -390,6 +417,7 @@ function renderReview() {
       <div class="seal">${(h.reviews || 0)}<br>回</div>
       <blockquote>${esc(h.quote)}</blockquote>
       <div class="src"><b>${esc(h.source)}</b>${h.author ? ' · ' + esc(h.author) : ''}</div>
+      ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
       ${h.note ? '<div class="note">' + esc(h.note) + '</div>' : ''}
       ${h.tags && h.tags.length ? '<div class="tags">' + h.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : ''}
     </article>
@@ -443,6 +471,7 @@ function renderLibrary() {
       g.map(h => `
       <div class="lcard">
         <blockquote>${esc(h.quote)}</blockquote>
+        ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
         ${h.note ? '<div class="lnote">' + esc(h.note) + '</div>' : ''}
         <div class="meta">
           <span>${h.fav ? '♥ ' : ''}回顧 ${(h.reviews || 0)} 次${h.tags && h.tags.length ? ' · ' + h.tags.map(esc).join('、') : ''}</span>
@@ -488,10 +517,11 @@ $('#save-btn').onclick = async () => {
       toast('已更新');
     } else {
       await setDoc(doc(db, 'users', USER.uid, 'highlights', uid()), {
-        ...data, reviews: 0, fav: false, created: todayStr(), createdAt: serverTimestamp()
+        ...data, url: capturedUrl, reviews: 0, fav: false, created: todayStr(), createdAt: serverTimestamp()
       });
       toast('已存入書庫');
     }
+    capturedUrl = '';
     editingId = null;
     $('#add-form').querySelectorAll('input,textarea').forEach(el => el.value = '');
     $('#save-btn').textContent = '存入書庫';
@@ -540,7 +570,10 @@ function switchView(v) {
   rerender();
   window.scrollTo(0, 0);
 }
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => switchView(b.dataset.view));
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  if (b.dataset.view === 'add') { editingId = null; capturedUrl = ''; $('#save-btn').textContent = '存入書庫'; }
+  switchView(b.dataset.view);
+});
 $('#search').addEventListener('input', renderLibrary);
 </script>
 </body>
