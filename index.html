@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>拾句 — 書摘回顧</title>
+<title>拾句 — 稍後讀與書摘回顧</title>
 <meta name="theme-color" content="#1B3247">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,9 +18,11 @@
   --ink:#17242F; --ink-soft:#4A5B68;
   --indigo:#2C4A63; --indigo-deep:#1B3247;
   --mist:#D4DDE0; --shu:#C4462B;
+  --hl:#F6E3B4;
   --radius:14px;
   --serif:'Noto Serif TC',serif;
   --sans:'Noto Sans TC',-apple-system,sans-serif;
+  --font-scale:1;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -29,10 +31,12 @@ body{
   font-size:16px;line-height:1.6;
   padding-bottom:calc(76px + env(safe-area-inset-bottom));
 }
+body.reading{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 header{
   padding:calc(16px + env(safe-area-inset-top)) 20px 12px;
   display:flex;align-items:baseline;justify-content:space-between;
 }
+body.reading header, body.reading nav{display:none}
 header h1{font-family:var(--serif);font-weight:700;font-size:26px;letter-spacing:.12em;color:var(--indigo-deep)}
 header h1 span{font-size:12px;letter-spacing:.28em;color:var(--ink-soft);font-family:var(--sans);font-weight:500;margin-left:10px}
 #userchip{font-size:12px;color:var(--ink-soft);cursor:pointer;background:none;border:none;font-family:var(--sans)}
@@ -72,6 +76,125 @@ nav button.on{color:var(--indigo-deep)}
 nav button.on .ic{color:var(--shu)}
 nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 
+/* ---- 通用 ---- */
+.btn{
+  flex:1;font-family:var(--sans);font-size:15px;font-weight:500;
+  padding:12px 0;border-radius:12px;cursor:pointer;
+  border:1px solid var(--mist);background:var(--card);color:var(--indigo-deep);
+}
+.btn.primary{background:var(--indigo-deep);border-color:var(--indigo-deep);color:#fff}
+.btn.sm{font-size:13px;padding:9px 0;color:var(--ink-soft)}
+.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.empty{text-align:center;padding:64px 24px;color:var(--ink-soft)}
+.empty .glyph{font-family:var(--serif);font-size:40px;color:var(--mist);margin-bottom:12px}
+.empty p{font-size:14px;line-height:1.8}
+.tag{font-size:11px;letter-spacing:.05em;color:var(--indigo);border:1px solid var(--mist);border-radius:999px;padding:2px 10px}
+
+/* ---- 收件匣 ---- */
+.savebar{display:flex;gap:8px;margin-bottom:12px}
+.savebar input{flex:1;font-family:var(--sans);font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card);color:var(--ink)}
+.savebar input:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.savebar .btn{flex:0 0 auto;padding:11px 18px}
+.mdoc-link{text-align:right;margin-bottom:10px}
+.mdoc-link button{background:none;border:none;font-size:12px;color:var(--indigo);cursor:pointer;font-family:var(--sans)}
+.statetabs{display:flex;gap:6px;margin-bottom:14px}
+.statetabs button{
+  flex:1;font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 0;
+  border-radius:999px;border:1px solid var(--mist);background:none;color:var(--ink-soft);cursor:pointer;
+}
+.statetabs button.on{background:var(--indigo-deep);border-color:var(--indigo-deep);color:#fff}
+.doccard{
+  display:flex;gap:12px;background:var(--card);border:1px solid var(--mist);
+  border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;
+}
+.doccard .thumb{
+  flex:0 0 56px;height:56px;border-radius:8px;background:var(--mist) center/cover no-repeat;
+  font-family:var(--serif);font-size:22px;color:var(--indigo);
+  display:flex;align-items:center;justify-content:center;
+}
+.doccard .body{flex:1;min-width:0}
+.doccard h3{font-family:var(--serif);font-size:15.5px;font-weight:600;color:var(--indigo-deep);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.doccard .sub{font-size:12px;color:var(--ink-soft);margin-top:3px}
+.doccard .sub .warn{color:var(--shu)}
+.doccard .pbar{height:3px;border-radius:2px;background:var(--mist);margin-top:8px;overflow:hidden}
+.doccard .pbar i{display:block;height:100%;background:var(--indigo);border-radius:2px}
+.doccard .ops{display:flex;gap:12px;margin-top:6px}
+.doccard .ops button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--indigo);font-family:var(--sans);padding:2px 0}
+.doccard .ops button.danger{color:var(--shu)}
+
+/* ---- 閱讀頁 ---- */
+#view-reader{max-width:none;padding:0}
+#reader-top{
+  position:sticky;top:0;z-index:40;
+  background:rgba(243,245,244,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--mist);
+  padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+  display:flex;align-items:center;gap:10px;
+}
+#reader-top button{background:none;border:none;font-family:var(--sans);font-size:14px;color:var(--indigo);cursor:pointer;padding:6px 8px}
+#reader-top .rtitle{flex:1;font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+#reader-pbar{position:absolute;left:0;bottom:-1px;height:2px;background:var(--shu);width:0%}
+#article{max-width:620px;margin:0 auto;padding:26px 22px 80px}
+#article .ahead{margin-bottom:30px}
+#article .ahead h2{font-family:var(--serif);font-size:calc(24px * var(--font-scale));line-height:1.6;color:var(--indigo-deep);margin-bottom:10px}
+#article .ahead .ameta{font-size:13px;color:var(--ink-soft)}
+#article .ahead .ameta a{color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--mist)}
+#resume-banner{
+  background:var(--card);border:1px solid var(--mist);border-radius:10px;
+  font-size:13px;color:var(--ink-soft);padding:10px 14px;margin-bottom:18px;
+}
+.blk{font-family:var(--serif);font-size:calc(17.5px * var(--font-scale));line-height:2.0;margin-bottom:1.1em;white-space:pre-wrap;overflow-wrap:break-word}
+.blk.h1{font-size:calc(23px * var(--font-scale));font-weight:700;color:var(--indigo-deep);line-height:1.7;margin-top:1.6em}
+.blk.h2{font-size:calc(20px * var(--font-scale));font-weight:700;color:var(--indigo-deep);line-height:1.7;margin-top:1.4em}
+.blk.h3{font-size:calc(18px * var(--font-scale));font-weight:700;color:var(--indigo-deep);line-height:1.7;margin-top:1.2em}
+.blk.quote{border-left:3px solid var(--mist);padding-left:16px;color:var(--ink-soft)}
+.blk.li{padding-left:1.2em;position:relative}
+.blk.li::before{content:'·';position:absolute;left:.3em;color:var(--indigo);font-weight:700}
+.blk.code{font-family:ui-monospace,Menlo,monospace;font-size:calc(13.5px * var(--font-scale));line-height:1.7;background:var(--card);border:1px solid var(--mist);border-radius:10px;padding:14px;overflow-x:auto;white-space:pre}
+.blk a{color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--mist)}
+.blk code{font-family:ui-monospace,Menlo,monospace;font-size:.85em;background:var(--card);border:1px solid var(--mist);border-radius:5px;padding:1px 5px}
+figure.blkimg{margin:0 0 1.4em}
+figure.blkimg img{max-width:100%;border-radius:10px;display:block;margin:0 auto}
+mark[data-hl-ids]{background:var(--hl);color:inherit;border-radius:2px;padding:1px 0;cursor:pointer}
+mark[data-hl-ids].flash{animation:hlflash 1.2s ease 2}
+@keyframes hlflash{0%,100%{background:var(--hl)}50%{background:var(--shu);color:#fff}}
+#reader-bottom{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  background:rgba(252,253,252,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--mist);
+  display:flex;justify-content:space-around;align-items:center;
+  padding:8px 10px calc(10px + env(safe-area-inset-bottom));
+}
+#reader-bottom button{background:none;border:none;font-family:var(--sans);font-size:13px;color:var(--indigo);cursor:pointer;padding:6px 10px}
+#extract-fail{padding:30px 22px;text-align:center}
+#extract-fail p{font-size:14px;color:var(--ink-soft);margin-bottom:16px;line-height:1.8}
+#extract-fail .btn{max-width:260px;margin:0 auto 10px;display:block;width:100%}
+
+/* ---- 選字浮層 / 劃線選單 ---- */
+#sel-pop,#mark-pop{
+  position:absolute;z-index:80;display:flex;gap:2px;
+  background:var(--indigo-deep);border-radius:10px;padding:4px;
+  box-shadow:0 4px 16px rgba(23,36,47,.3);
+}
+#sel-pop button,#mark-pop button{
+  background:none;border:none;color:#fff;font-family:var(--sans);
+  font-size:13px;padding:8px 12px;cursor:pointer;border-radius:7px;white-space:nowrap;
+}
+#sel-pop button:active,#mark-pop button:active{background:var(--indigo)}
+#mark-pop button.danger{color:#F2A48E}
+
+/* ---- 本篇劃線抽屜 ---- */
+#hl-drawer{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  background:var(--card);border-radius:18px 18px 0 0;border:1px solid var(--mist);
+  max-height:70vh;overflow:auto;padding:18px 18px calc(24px + env(safe-area-inset-bottom));
+  box-shadow:0 -8px 30px rgba(23,36,47,.18);
+}
+#hl-drawer h3{font-family:var(--serif);font-size:16px;color:var(--indigo-deep);margin-bottom:12px}
+#hl-drawer .dhl{padding:10px 12px;border:1px solid var(--mist);border-radius:10px;margin-bottom:8px;cursor:pointer}
+#hl-drawer .dhl blockquote{font-family:var(--serif);font-size:14.5px;line-height:1.8;white-space:pre-wrap}
+#hl-drawer .dhl .dnote{font-size:12px;color:var(--ink-soft);margin-top:4px;white-space:pre-wrap}
+
 /* ---- 回顧卡片 ---- */
 .review-head{display:flex;justify-content:space-between;align-items:center;margin:6px 2px 14px}
 .review-head .date{font-size:13px;color:var(--ink-soft);letter-spacing:.06em}
@@ -90,9 +213,8 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .qcard .src b{color:var(--indigo-deep)}
 .qcard .note{margin-top:12px;padding:10px 12px;background:var(--paper);border-radius:8px;font-size:14px;color:var(--ink-soft);white-space:pre-wrap}
 .qcard .tags{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
-.tag{font-size:11px;letter-spacing:.05em;color:var(--indigo);border:1px solid var(--mist);border-radius:999px;padding:2px 10px}
 .srclink{margin-top:8px}
-.srclink a{font-size:12px;color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--mist)}
+.srclink a,.srclink button{font-size:12px;color:var(--indigo);text-decoration:none;border-bottom:1px solid var(--mist);background:none;border-top:none;border-left:none;border-right:none;cursor:pointer;font-family:var(--sans);padding:0}
 .seal{
   position:absolute;right:18px;top:18px;width:40px;height:40px;
   border:2px solid var(--shu);border-radius:6px;color:var(--shu);
@@ -102,16 +224,8 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 }
 .qactions{display:flex;gap:10px;margin-bottom:10px}
 .qactions.sub{margin-bottom:22px}
-.btn{
-  flex:1;font-family:var(--sans);font-size:15px;font-weight:500;
-  padding:12px 0;border-radius:12px;cursor:pointer;
-  border:1px solid var(--mist);background:var(--card);color:var(--indigo-deep);
-}
-.btn.primary{background:var(--indigo-deep);border-color:var(--indigo-deep);color:#fff}
 .btn.fav{flex:0 0 52px}
 .btn.fav.on{color:var(--shu);border-color:var(--shu)}
-.btn.sm{font-size:13px;padding:9px 0;color:var(--ink-soft)}
-.btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .done-banner{text-align:center;padding:56px 20px}
 .done-banner .stamp{
   width:74px;height:74px;margin:0 auto 18px;
@@ -121,22 +235,28 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 }
 .done-banner p{color:var(--ink-soft);font-size:14px;margin-top:6px}
 
-/* ---- streak 日曆 ---- */
-#cal-overlay{position:fixed;inset:0;background:rgba(23,36,47,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:24px}
-#cal-box{background:var(--card);border-radius:var(--radius);padding:20px;max-width:380px;width:100%;max-height:80vh;overflow:auto}
-#cal-box h3{font-family:var(--serif);font-size:17px;color:var(--indigo-deep);margin-bottom:4px}
-#cal-box .cal-sub{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
+/* ---- overlay(日曆/表單)---- */
+.overlay{position:fixed;inset:0;background:rgba(23,36,47,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:24px}
+.obox{background:var(--card);border-radius:var(--radius);padding:20px;max-width:400px;width:100%;max-height:85vh;overflow:auto}
+.obox h3{font-family:var(--serif);font-size:17px;color:var(--indigo-deep);margin-bottom:4px}
+.obox .osub{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
 .cal-month h4{font-family:var(--serif);font-size:14px;color:var(--indigo-deep);margin:12px 0 6px}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cal-grid span{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-soft);border-radius:6px}
 .cal-grid span.hit{background:var(--shu);color:#fff;font-weight:500}
 .cal-grid span.future{opacity:.3}
-#cal-close{width:100%;margin-top:16px}
+.obox .close{width:100%;margin-top:16px}
+.obox form label{display:block;font-size:13px;font-weight:500;color:var(--ink-soft);margin:14px 2px 6px}
+.obox form input,.obox form textarea{width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);padding:11px 13px;border-radius:10px;border:1px solid var(--mist);background:var(--paper)}
+.obox form textarea{resize:vertical;min-height:120px;line-height:1.8}
+.obox form input:focus,.obox form textarea:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.obox form .btn{width:100%;margin-top:18px}
 
-/* ---- 書庫 ---- */
+/* ---- 劃線庫 ---- */
 .searchbar{display:flex;gap:8px;margin-bottom:14px}
 .searchbar input{flex:1;font-family:var(--sans);font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card);color:var(--ink)}
 .searchbar input:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.searchbar .btn{flex:0 0 auto;padding:11px 16px}
 .group-title{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--indigo-deep);margin:20px 2px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .group-title small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--ink-soft);white-space:nowrap}
 .lcard{background:var(--card);border:1px solid var(--mist);border-radius:12px;padding:16px 16px 12px;margin-bottom:10px}
@@ -147,23 +267,15 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .lcard .meta .ops{display:flex;gap:14px}
 .lcard .meta button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--indigo);font-family:var(--sans);padding:4px 0}
 .lcard .meta button.danger{color:var(--shu)}
-.empty{text-align:center;padding:64px 24px;color:var(--ink-soft)}
-.empty .glyph{font-family:var(--serif);font-size:40px;color:var(--mist);margin-bottom:12px}
-.empty p{font-size:14px;line-height:1.8}
-
-/* ---- 表單 ---- */
-form label{display:block;font-size:13px;font-weight:500;color:var(--ink-soft);margin:16px 2px 6px}
-form input,form textarea{width:100%;font-family:var(--sans);font-size:16px;color:var(--ink);padding:12px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card)}
-form textarea{resize:vertical;min-height:110px;font-family:var(--serif);line-height:1.8}
-form input:focus,form textarea:focus{outline:2px solid var(--indigo);outline-offset:1px}
-form .submit{width:100%;margin-top:22px;padding:14px 0}
 
 /* ---- 匯出/設定 ---- */
 .export-box{background:var(--card);border:1px solid var(--mist);border-radius:var(--radius);padding:18px;margin-bottom:14px}
 .export-box h3{font-family:var(--serif);font-size:16px;color:var(--indigo-deep);margin-bottom:6px}
 .export-box p{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
-.export-box .setrow{display:flex;gap:10px;align-items:center}
-.export-box .setrow input{width:90px;font-family:var(--sans);font-size:15px;padding:9px 12px;border-radius:10px;border:1px solid var(--mist);background:var(--paper);color:var(--ink)}
+.export-box .setrow{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.export-box .setrow label{flex:1;font-size:13px;color:var(--ink-soft)}
+.export-box .setrow input{width:110px;font-family:var(--sans);font-size:15px;padding:9px 12px;border-radius:10px;border:1px solid var(--mist);background:var(--paper);color:var(--ink)}
+.export-box .setrow input.wide{width:100%;flex:2}
 .export-box .setrow .btn{flex:0 0 auto;padding:9px 20px;font-size:14px}
 
 .toast{
@@ -171,7 +283,8 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
   transform:translateX(-50%) translateY(8px);
   background:var(--indigo-deep);color:#fff;font-size:13px;
   padding:9px 18px;border-radius:999px;opacity:0;pointer-events:none;
-  transition:opacity .25s,transform .25s;z-index:60;white-space:nowrap;
+  transition:opacity .25s,transform .25s;z-index:90;white-space:nowrap;
+  max-width:88vw;overflow:hidden;text-overflow:ellipsis;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -180,7 +293,7 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
 <body>
 
 <header>
-  <h1>拾句<span>SHIJU · 書摘回顧</span></h1>
+  <h1>拾句<span>SHIJU · 稍後讀</span></h1>
   <button id="userchip" class="hidden" title="點擊登出"></button>
 </header>
 
@@ -188,10 +301,44 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
   <!-- 登入 -->
   <section id="view-login">
     <div class="mark">拾</div>
-    <h2>拾句 · 書摘回顧</h2>
-    <p>用 Google 帳號登入,<br>iPhone 與 iPad 的書摘會自動同步。</p>
+    <h2>拾句 · 稍後讀與書摘回顧</h2>
+    <p>存下想讀的文章,舒服地讀完,<br>劃下重點,每天回顧。</p>
     <button id="login-btn">使用 Google 登入</button>
     <div id="login-hint"></div>
+  </section>
+
+  <!-- 收件匣 -->
+  <section id="view-inbox" class="hidden">
+    <div class="savebar">
+      <input id="save-url" type="url" placeholder="貼上文章網址…" aria-label="文章網址">
+      <button class="btn primary" id="save-url-btn">存入</button>
+    </div>
+    <div class="mdoc-link">
+      <button id="manual-doc-btn">+ 手動輸入內文(實體書 / FB 貼文)</button>
+    </div>
+    <div class="statetabs" id="statetabs">
+      <button data-state="inbox" class="on">收件匣</button>
+      <button data-state="later">稍後</button>
+      <button data-state="archive">封存</button>
+    </div>
+    <div id="doc-list"></div>
+  </section>
+
+  <!-- 閱讀頁 -->
+  <section id="view-reader" class="hidden">
+    <div id="reader-top">
+      <button id="reader-back">‹ 返回</button>
+      <div class="rtitle" id="reader-title"></div>
+      <button id="reader-font-minus" title="縮小字級">A−</button>
+      <button id="reader-font-plus" title="放大字級">A＋</button>
+      <div id="reader-pbar"></div>
+    </div>
+    <div id="article"></div>
+    <div id="reader-bottom">
+      <button id="rb-hls">本篇劃線</button>
+      <button id="rb-later">移到稍後</button>
+      <button id="rb-archive">封存</button>
+    </div>
   </section>
 
   <!-- 今日回顧 -->
@@ -206,49 +353,32 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
     <div id="review-stage"></div>
   </section>
 
-  <!-- 書庫 -->
-  <section id="view-library" class="hidden">
+  <!-- 劃線庫 -->
+  <section id="view-highlights" class="hidden">
     <div class="searchbar">
-      <input id="search" type="search" placeholder="搜尋內容、出處、作者、標籤…" aria-label="搜尋書摘">
+      <input id="search" type="search" placeholder="搜尋劃線、註解、出處、標籤…" aria-label="搜尋劃線">
+      <button class="btn" id="manual-hl-btn">＋劃線</button>
     </div>
-    <div id="library-list"></div>
-  </section>
-
-  <!-- 新增 -->
-  <section id="view-add" class="hidden">
-    <form id="add-form" onsubmit="return false">
-      <label for="f-quote">摘錄內容 *</label>
-      <textarea id="f-quote" required placeholder="貼上或輸入你想留下的句子…"></textarea>
-      <label for="f-source">出處(書名/文章)*</label>
-      <input id="f-source" required placeholder="例:愛的藝術">
-      <label for="f-author">作者</label>
-      <input id="f-author" placeholder="例:Erich Fromm">
-      <label for="f-note">我的筆記</label>
-      <textarea id="f-note" style="min-height:70px;font-family:var(--sans)" placeholder="這句話為什麼重要?"></textarea>
-      <label for="f-tags">標籤(逗號分隔)</label>
-      <input id="f-tags" placeholder="例:設計, 哲學, IELTS">
-      <button type="button" class="btn primary submit" id="save-btn">存入書庫</button>
-    </form>
+    <div id="hl-list"></div>
   </section>
 
   <!-- 匯出/設定 -->
   <section id="view-export" class="hidden">
     <div class="export-box">
       <h3>設定</h3>
-      <p>每日回顧卡片數量(3–50,隔日生效)。</p>
-      <div class="setrow">
-        <input id="set-daily" type="number" min="3" max="50" inputmode="numeric">
-        <button class="btn" id="save-settings">儲存</button>
-      </div>
+      <div class="setrow"><label>每日回顧卡片數(3–50,隔日生效)</label><input id="set-daily" type="number" min="3" max="50" inputmode="numeric"></div>
+      <div class="setrow"><label>自訂擷取端點(選填,留空用 Jina Reader)</label></div>
+      <div class="setrow"><input id="set-extract" type="url" class="wide" placeholder="https://…/extract"></div>
+      <div class="setrow"><span style="flex:1"></span><button class="btn" id="save-settings">儲存設定</button></div>
     </div>
     <div class="export-box">
       <h3>Markdown</h3>
-      <p>依出處分組,可直接貼到 Notion 或 Obsidian。</p>
+      <p>劃線依文章分組,可直接貼到 Notion 或 Obsidian。</p>
       <button class="btn" id="copy-md">複製 Markdown</button>
     </div>
     <div class="export-box">
       <h3>JSON 備份</h3>
-      <p>完整資料備份(含書目與 SRS 狀態)。</p>
+      <p>文章清單、劃線與 SRS 狀態(不含文章內文)。</p>
       <button class="btn" id="copy-json">複製 JSON</button>
     </div>
     <div class="export-box">
@@ -259,18 +389,70 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
 </main>
 
 <nav id="tabbar" class="hidden" aria-label="主選單">
-  <button data-view="review" class="on"><span class="ic">今</span>今日回顧</button>
-  <button data-view="library"><span class="ic">庫</span>書庫</button>
-  <button data-view="add"><span class="ic">拾</span>新增</button>
+  <button data-view="inbox" class="on"><span class="ic">收</span>收件匣</button>
+  <button data-view="review"><span class="ic">今</span>今日回顧</button>
+  <button data-view="highlights"><span class="ic">庫</span>劃線庫</button>
   <button data-view="export"><span class="ic">出</span>匯出</button>
 </nav>
 
-<div id="cal-overlay" class="hidden">
-  <div id="cal-box">
+<!-- 選字浮層 -->
+<div id="sel-pop" class="hidden">
+  <button id="sp-hl">劃線</button>
+  <button id="sp-note">劃線＋註</button>
+  <button id="sp-copy">複製</button>
+</div>
+<!-- 既有劃線選單 -->
+<div id="mark-pop" class="hidden">
+  <button id="mp-note">註解</button>
+  <button id="mp-tags">標籤</button>
+  <button id="mp-del" class="danger">刪除</button>
+</div>
+
+<!-- 本篇劃線抽屜 -->
+<div id="hl-drawer" class="hidden">
+  <h3>本篇劃線</h3>
+  <div id="hl-drawer-list"></div>
+</div>
+
+<!-- streak 日曆 -->
+<div id="cal-overlay" class="overlay hidden">
+  <div class="obox">
     <h3>回顧日曆</h3>
-    <div class="cal-sub" id="cal-streak"></div>
+    <div class="osub" id="cal-streak"></div>
     <div id="cal-body"></div>
-    <button class="btn" id="cal-close">關閉</button>
+    <button class="btn close" id="cal-close">關閉</button>
+  </div>
+</div>
+
+<!-- 手動輸入文件 -->
+<div id="mdoc-overlay" class="overlay hidden">
+  <div class="obox">
+    <h3>手動輸入內文</h3>
+    <div class="osub">給實體書、Facebook 貼文等抓不到的來源。</div>
+    <form id="mdoc-form" onsubmit="return false">
+      <label>標題 *</label><input id="md-title" required>
+      <label>作者</label><input id="md-author">
+      <label>原始網址(選填)</label><input id="md-url" type="url">
+      <label>內文 *(空行分段)</label><textarea id="md-body" required></textarea>
+      <button class="btn primary" id="md-save">存入收件匣</button>
+      <button class="btn close" type="button" id="md-cancel">取消</button>
+    </form>
+  </div>
+</div>
+
+<!-- 手動新增劃線 -->
+<div id="mhl-overlay" class="overlay hidden">
+  <div class="obox">
+    <h3>手動新增劃線</h3>
+    <form id="mhl-form" onsubmit="return false">
+      <label>摘錄內容 *</label><textarea id="mh-text" required style="min-height:90px"></textarea>
+      <label>出處(書名/文章)*</label><input id="mh-source" required>
+      <label>作者</label><input id="mh-author">
+      <label>我的筆記</label><textarea id="mh-note" style="min-height:60px"></textarea>
+      <label>標籤(逗號分隔)</label><input id="mh-tags">
+      <button class="btn primary" id="mh-save">存入</button>
+      <button class="btn close" type="button" id="mh-cancel">取消</button>
+    </form>
   </div>
 </div>
 
@@ -298,7 +480,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
+  collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot,
   serverTimestamp, writeBatch, arrayUnion, increment, deleteField, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -314,36 +496,30 @@ try {
   db = getFirestore(app);
 }
 
-/* ---------- SRS 參數 (§4) ---------- */
+/* ---------- SRS 參數 (§7) ---------- */
 const SRS = {
-  initialHalfLife: 1,     // 新劃線半衰期(天)→ 隔天就進入回顧候選
-  growthFactor: 2,        // 每次成功回想,半衰期加倍
-  minHalfLife: 0.25,
-  maxHalfLife: 1825,      // 5 年封頂
-  minFreq: 0.25, maxFreq: 4,
-  defaultDaily: 15,
-  poolFloor: 0.0001       // 權重下限,避免剛看過的卡權重歸零導致抽樣崩潰
+  initialHalfLife: 1, growthFactor: 2, minHalfLife: 0.25, maxHalfLife: 1825,
+  minFreq: 0.25, maxFreq: 4, defaultDaily: 15, poolFloor: 0.0001
 };
 
 /* ---------- 狀態 ---------- */
 let USER = null;
-let BOOKS = {};              // bookId → book
-let HL = [];                 // highlights(onSnapshot 即時更新)
-let HL_LOADED = false;
-let META = {};               // meta/state:settings + streak
-let SESSION = null;          // 當日 reviewSessions/{date}
-let SESSION_LOADED = false;
-let SESSION_DATE = null;
-let unsubHL = null, unsubBooks = null, unsubMeta = null, unsubSession = null;
-let editingId = null;
-let currentView = 'review';
-let capturedUrl = '';
-let creatingSession = false;
-let migrationRan = false;
-let metaMigrating = false;
+let DOCS = {};               // docId → document metadata
+let HL = [];                 // highlights
+let HL_LOADED = false, DOCS_LOADED = false;
+let META = {};
+let SESSION = null, SESSION_LOADED = false, SESSION_DATE = null;
+let unsubDocs = null, unsubHL = null, unsubMeta = null, unsubSession = null;
+let currentView = 'inbox';
+let inboxState = 'inbox';
+let creatingSession = false, migrationRan = false, metaMigrating = false;
+const contentCache = new Map();   // docId → {markdown, blocks}
+let READER = null;                // { docId, blocks, pendingScrollHl }
+let pendingSel = null;            // 選字中的錨定資訊
 
-/* ---------- 分享擷取(iOS 捷徑用) ---------- */
+/* ---------- URL 參數:?save=(存文章)與 ?quote=(舊版捷徑)---------- */
 const _params = new URLSearchParams(location.search);
+let pendingSave = _params.get('save') || null;
 let pendingCapture = null;
 if (_params.get('quote')) {
   pendingCapture = {
@@ -351,19 +527,8 @@ if (_params.get('quote')) {
     source: _params.get('source') || _params.get('title') || '',
     url: _params.get('url') || ''
   };
-  history.replaceState(null, '', location.pathname);
 }
-function applyPendingCapture() {
-  if (!pendingCapture) return;
-  editingId = null;
-  $('#f-quote').value = pendingCapture.quote;
-  $('#f-source').value = pendingCapture.source;
-  capturedUrl = pendingCapture.url;
-  pendingCapture = null;
-  $('#save-btn').textContent = '存入書庫';
-  switchView('add');
-  toast('已帶入摘錄,確認出處後存檔');
-}
+if (pendingSave || pendingCapture) history.replaceState(null, '', location.pathname);
 
 /* ---------- 小工具 ---------- */
 const $ = s => document.querySelector(s);
@@ -372,12 +537,26 @@ const todayStr = () => dateKey(new Date());
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const esc = s => (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const docRef = id => doc(db, 'users', USER.uid, 'documents', id);
+const contentRef = id => doc(db, 'users', USER.uid, 'documents', id, 'content', 'body');
 const hlRef = id => doc(db, 'users', USER.uid, 'highlights', id);
-const bookRef = id => doc(db, 'users', USER.uid, 'books', id);
 const sessRef = () => doc(db, 'users', USER.uid, 'reviewSessions', SESSION_DATE);
 const hlById = id => HL.find(h => h.id === id);
-const settings = () => ({ dailyCount: clamp(META.settings?.dailyCount || SRS.defaultDaily, 3, 50) });
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+const settings = () => ({
+  dailyCount: clamp(META.settings?.dailyCount || SRS.defaultDaily, 3, 50),
+  fontScale: clamp(META.settings?.fontScale || 1, 0.8, 1.4),
+  extractEndpoint: META.settings?.extractEndpoint || ''
+});
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200); }
+function throttle(fn, ms) {
+  let last = 0, timer = null, lastArgs = null;
+  const run = () => { last = Date.now(); timer = null; fn(...lastArgs); };
+  return (...args) => {
+    lastArgs = args;
+    if (Date.now() - last >= ms) run();
+    else if (!timer) timer = setTimeout(run, ms - (Date.now() - last));
+  };
+}
 
 /* ---------- 登入/登出 ---------- */
 const provider = new GoogleAuthProvider();
@@ -385,7 +564,6 @@ $('#login-btn').onclick = async () => {
   try {
     await signInWithPopup(auth, provider);
   } catch (e) {
-    // iOS 全螢幕模式(加入主畫面)偶爾擋 popup → 改走 redirect
     if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
       try { await signInWithRedirect(auth, provider); }
       catch (e2) { $('#login-hint').textContent = '登入失敗:' + e2.message; }
@@ -409,37 +587,42 @@ onAuthStateChanged(auth, user => {
     $('#userchip').classList.remove('hidden');
     $('#userchip').textContent = user.displayName || user.email;
     subscribe();
-    switchView('review');
-    applyPendingCapture();
+    migrateIfNeeded();
+    switchView('inbox');
+    if (pendingSave) { const u = pendingSave; pendingSave = null; saveUrl(u); }
+    if (pendingCapture) { openManualHl(pendingCapture); pendingCapture = null; }
   } else {
-    [unsubHL, unsubBooks, unsubMeta, unsubSession].forEach(u => u && u());
-    unsubHL = unsubBooks = unsubMeta = unsubSession = null;
-    BOOKS = {}; HL = []; META = {}; SESSION = null;
-    HL_LOADED = SESSION_LOADED = false; migrationRan = false;
+    [unsubDocs, unsubHL, unsubMeta, unsubSession].forEach(u => u && u());
+    unsubDocs = unsubHL = unsubMeta = unsubSession = null;
+    DOCS = {}; HL = []; META = {}; SESSION = null; contentCache.clear();
+    HL_LOADED = DOCS_LOADED = SESSION_LOADED = false; migrationRan = false;
+    closeReader(true);
     $('#tabbar').classList.add('hidden');
     $('#userchip').classList.add('hidden');
-    ['review', 'library', 'add', 'export'].forEach(v => $('#view-' + v).classList.add('hidden'));
+    ['inbox', 'review', 'highlights', 'export'].forEach(v => $('#view-' + v).classList.add('hidden'));
     $('#view-login').classList.remove('hidden');
   }
 });
 
-/* ---------- Firestore 即時訂閱 ---------- */
+/* ---------- Firestore 訂閱 ---------- */
 function subscribe() {
-  unsubBooks = onSnapshot(collection(db, 'users', USER.uid, 'books'), snap => {
-    BOOKS = {};
-    snap.docs.forEach(d => BOOKS[d.id] = { id: d.id, ...d.data() });
+  unsubDocs = onSnapshot(collection(db, 'users', USER.uid, 'documents'), snap => {
+    DOCS = {};
+    snap.docs.forEach(d => DOCS[d.id] = { id: d.id, ...d.data() });
+    DOCS_LOADED = true;
     rerender();
   }, err => toast('讀取失敗:' + err.code));
   unsubHL = onSnapshot(collection(db, 'users', USER.uid, 'highlights'), snap => {
     HL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     HL.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0) || (a.id < b.id ? -1 : 1));
     HL_LOADED = true;
-    migrateIfNeeded();
     rerender();
+    if (READER) applyAllMarks();
   }, err => toast('讀取失敗:' + err.code));
   unsubMeta = onSnapshot(doc(db, 'users', USER.uid, 'meta', 'state'), snap => {
     META = snap.exists() ? snap.data() : {};
     migrateMetaIfNeeded();
+    applyFontScale();
     rerender();
   });
   subscribeSession();
@@ -455,13 +638,14 @@ function subscribeSession() {
   });
 }
 function rerender() {
+  if (READER) return; // 閱讀中不整頁重繪,劃線由各動作局部更新
+  if (currentView === 'inbox') renderInbox();
   if (currentView === 'review') renderReview();
-  if (currentView === 'library') renderLibrary();
+  if (currentView === 'highlights') renderHlLibrary();
   if (currentView === 'export') renderExport();
 }
 
 async function saveMeta() {
-  // streak 歷史只保留最近 365 天
   const hist = META.streak?.history || {};
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 365);
   const co = dateKey(cutoff);
@@ -469,63 +653,99 @@ async function saveMeta() {
   await setDoc(doc(db, 'users', USER.uid, 'meta', 'state'), META);
 }
 
-/* ---------- 舊資料遷移:單層 highlights → books + highlights ---------- */
+/* ---------- 資料遷移 ----------
+   兩代舊格式一次處理:
+   gen1:單層 highlights(quote/source/author 欄位)
+   gen2:books + highlights(bookId 欄位)
+   目標:documents + highlights(docId + 錨定欄位)          */
 async function migrateIfNeeded() {
   if (migrationRan) return;
-  const old = HL.filter(h => h.quote !== undefined && h.text === undefined);
-  if (!old.length) return;
   migrationRan = true;
-  toast('偵測到舊資料,升級中…');
   try {
-    const groups = new Map();
-    for (const h of old) {
-      const k = (h.source || '未命名') + '\u0000' + (h.author || '');
-      if (!groups.has(k)) groups.set(k, []);
-      groups.get(k).push(h);
-    }
+    const [bookSnap, hlSnap] = await Promise.all([
+      getDocs(collection(db, 'users', USER.uid, 'books')),
+      getDocs(collection(db, 'users', USER.uid, 'highlights'))
+    ]);
+    const books = bookSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const hls = hlSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const gen1 = hls.filter(h => h.quote !== undefined && h.text === undefined);
+    const gen2 = hls.filter(h => h.bookId !== undefined && h.docId === undefined);
+    if (!books.length && !gen1.length && !gen2.length) return;
+    toast('偵測到舊資料,升級中…');
     const ops = [];
-    const bookIdByKey = new Map();
-    for (const [k, list] of groups) {
-      const [title, author] = k.split('\u0000');
-      const ex = Object.values(BOOKS).find(b => b.title === title && (b.author || '') === author);
-      const bid = ex ? ex.id : uid();
-      bookIdByKey.set(k, bid);
-      if (ex) {
-        ops.push({ type: 'update', ref: bookRef(bid), data: { highlightCount: increment(list.length) } });
-      } else {
-        ops.push({ type: 'set', ref: bookRef(bid), data: {
-          title, author, category: list.some(h => h.url) ? 'article' : 'book',
-          coverUrl: null, sourceUrl: null, frequency: 1,
-          highlightCount: list.length, createdAt: serverTimestamp()
-        }});
-      }
+
+    // gen2:books → documents(沿用同 id,劃線 bookId → docId)
+    for (const b of books) {
+      ops.push({ type: 'set', ref: docRef(b.id), data: {
+        title: b.title || '未命名', author: b.author || null,
+        sourceUrl: b.sourceUrl || null, siteName: null, coverUrl: b.coverUrl || null,
+        category: b.category === 'article' ? 'article' : (b.category || 'manual'),
+        state: 'archive', wordCount: 0, readingProgress: 0, lastPosition: 0,
+        frequency: b.frequency ?? 1, highlightCount: b.highlightCount ?? 0,
+        savedAt: b.createdAt || serverTimestamp(), extractStatus: 'manual'
+      }});
+      ops.push({ type: 'delete', ref: doc(db, 'users', USER.uid, 'books', b.id) });
     }
-    for (const h of old) {
-      const k = (h.source || '未命名') + '\u0000' + (h.author || '');
-      const rc = h.reviews || 0;
-      let lastR = null;
-      if (h.lastReviewed) {
-        const d = new Date(h.lastReviewed + 'T12:00:00');
-        if (!isNaN(d)) lastR = Timestamp.fromDate(d);
-      }
+    for (const h of gen2) {
       ops.push({ type: 'update', ref: hlRef(h.id), data: {
-        text: h.quote, note: h.note || '', bookId: bookIdByKey.get(k),
-        tags: h.tags || [], location: null, url: h.url || null,
-        favorited: !!h.fav, discarded: false,
-        srs: {
-          halfLife: clamp(SRS.initialHalfLife * Math.pow(SRS.growthFactor, rc), SRS.minHalfLife, SRS.maxHalfLife),
-          lastReviewed: lastR, reviewCount: rc
-        },
-        quote: deleteField(), source: deleteField(), author: deleteField(),
-        reviews: deleteField(), fav: deleteField(), lastReviewed: deleteField(), created: deleteField()
+        docId: h.bookId, color: 'yellow',
+        blockIndex: null, startOffset: null, endOffset: null,
+        bookId: deleteField()
       }});
     }
+
+    // gen1:依 出處+作者 分組建 manual documents
+    if (gen1.length) {
+      const groupKey = h => JSON.stringify([h.source || '未命名', h.author || '']);
+      const groups = new Map();
+      for (const h of gen1) {
+        const k = groupKey(h);
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(h);
+      }
+      for (const [k, list] of groups) {
+        const [title, author] = JSON.parse(k);
+        const did = uid();
+        ops.push({ type: 'set', ref: docRef(did), data: {
+          title, author: author || null,
+          sourceUrl: list.find(h => h.url)?.url || null, siteName: null, coverUrl: null,
+          category: 'manual', state: 'archive', wordCount: 0, readingProgress: 0,
+          lastPosition: 0, frequency: 1, highlightCount: list.length,
+          savedAt: serverTimestamp(), extractStatus: 'manual'
+        }});
+        for (const h of list) {
+          const rc = h.reviews || 0;
+          let lastR = null;
+          if (h.lastReviewed && typeof h.lastReviewed === 'string') {
+            const d = new Date(h.lastReviewed + 'T12:00:00');
+            if (!isNaN(d)) lastR = Timestamp.fromDate(d);
+          }
+          ops.push({ type: 'update', ref: hlRef(h.id), data: {
+            text: h.quote, note: h.note || '', docId: did,
+            tags: h.tags || [], color: 'yellow', url: h.url || null,
+            blockIndex: null, startOffset: null, endOffset: null,
+            favorited: !!h.fav, discarded: !!h.discarded,
+            srs: {
+              halfLife: clamp(SRS.initialHalfLife * Math.pow(SRS.growthFactor, rc), SRS.minHalfLife, SRS.maxHalfLife),
+              lastReviewed: lastR, reviewCount: rc
+            },
+            quote: deleteField(), source: deleteField(), author: deleteField(),
+            reviews: deleteField(), fav: deleteField(), lastReviewed: deleteField(), created: deleteField()
+          }});
+        }
+      }
+    }
+
     for (let i = 0; i < ops.length; i += 400) {
       const b = writeBatch(db);
-      ops.slice(i, i + 400).forEach(o => o.type === 'set' ? b.set(o.ref, o.data) : b.update(o.ref, o.data));
+      ops.slice(i, i + 400).forEach(o => {
+        if (o.type === 'set') b.set(o.ref, o.data);
+        else if (o.type === 'update') b.update(o.ref, o.data);
+        else b.delete(o.ref);
+      });
       await b.commit();
     }
-    toast('資料升級完成:' + old.length + ' 則劃線、' + groups.size + ' 個出處');
+    toast('資料升級完成(' + (gen1.length + gen2.length) + ' 則劃線)');
   } catch (e) {
     migrationRan = false;
     toast('資料升級失敗:' + (e.code || e.message));
@@ -544,8 +764,628 @@ async function migrateMetaIfNeeded() {
   metaMigrating = false;
 }
 
-/* ---------- 間隔重複演算法 (§4) ---------- */
-// 回想機率 p(t) = 2^(-elapsedDays / halfLife)
+/* ================================================================
+   Markdown → blocks parser(附錄 A 契約:確定性、text 為純文字)
+   block: { i, type, text, md, src? } — md 供行內格式渲染。
+   inlineParse 同時是 text 與 HTML 的唯一來源,保證
+   textContent(inlineHTML(md)) === inlineText(md) 恆成立。
+   ================================================================ */
+const INLINE_RE = /!\[([^\]]*)\]\(([^)\s]+)[^)]*\)|\[([^\]]+)\]\(([^)\s]+)[^)]*\)|\*\*([^*\n]+)\*\*|__([^_\n]+)__|\*([^*\n]+)\*|_([^_\n]+)_|`([^`\n]+)`/g;
+function inlineParse(md) {
+  const tokens = [];
+  let last = 0;
+  md.replace(INLINE_RE, (m, imgAlt, imgSrc, lkText, lkHref, b1, b2, i1, i2, code, offset) => {
+    if (offset > last) tokens.push({ t: 'text', text: md.slice(last, offset) });
+    if (imgSrc !== undefined) { if (imgAlt) tokens.push({ t: 'text', text: imgAlt }); } // 行內圖片以 alt 純文字呈現
+    else if (lkHref !== undefined) tokens.push({ t: 'link', text: lkText, href: lkHref });
+    else if (b1 !== undefined || b2 !== undefined) tokens.push({ t: 'bold', text: b1 ?? b2 });
+    else if (i1 !== undefined || i2 !== undefined) tokens.push({ t: 'em', text: i1 ?? i2 });
+    else if (code !== undefined) tokens.push({ t: 'code', text: code });
+    last = offset + m.length;
+    return m;
+  });
+  if (last < md.length) tokens.push({ t: 'text', text: md.slice(last) });
+  return tokens;
+}
+const inlineText = md => inlineParse(md).map(t => t.text).join('');
+function inlineHTML(md) {
+  return inlineParse(md).map(t => {
+    const x = esc(t.text);
+    if (t.t === 'link') return '<a href="' + esc(t.href) + '" target="_blank" rel="noopener">' + x + '</a>';
+    if (t.t === 'bold') return '<b>' + x + '</b>';
+    if (t.t === 'em') return '<i>' + x + '</i>';
+    if (t.t === 'code') return '<code>' + x + '</code>';
+    return x;
+  }).join('');
+}
+const IMG_LINE = /^!\[([^\]]*)\]\(([^)\s]+)[^)]*\)\s*$/;
+function parseMarkdown(md) {
+  const blocks = [];
+  const push = (type, mdText, src) => {
+    const text = type === 'code' ? mdText : inlineText(mdText);
+    if (!text.trim() && type !== 'img') return;
+    blocks.push({ i: blocks.length, type, text, md: mdText, ...(src ? { src } : {}) });
+  };
+  const lines = md.replace(/\r\n?/g, '\n').split('\n');
+  let para = [], quote = [], code = null;
+  const flushPara = () => { if (para.length) { push('p', para.join('\n')); para = []; } };
+  const flushQuote = () => { if (quote.length) { push('quote', quote.join('\n')); quote = []; } };
+  for (const raw of lines) {
+    const line = raw.replace(/\s+$/, '');
+    if (code !== null) {
+      if (/^\s*```/.test(line)) { push('code', code.join('\n')); code = null; }
+      else code.push(raw);
+      continue;
+    }
+    if (/^\s*```/.test(line)) { flushPara(); flushQuote(); code = []; continue; }
+    if (!line.trim()) { flushPara(); flushQuote(); continue; }
+    const img = line.match(IMG_LINE);
+    if (img) { flushPara(); flushQuote(); push('img', img[1] || '', img[2]); continue; }
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { flushPara(); flushQuote(); push('h' + Math.min(h[1].length, 3), h[2]); continue; }
+    if (/^\s*>/.test(line)) { flushPara(); quote.push(line.replace(/^\s*>\s?/, '')); continue; }
+    const li = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(.*)$/);
+    if (li) { flushPara(); flushQuote(); push('li', li[1]); continue; }
+    if (/^\s*(?:---+|\*\*\*+|===+)\s*$/.test(line)) { flushPara(); flushQuote(); continue; }
+    flushQuote(); para.push(line);
+  }
+  if (code !== null) push('code', code.join('\n'));
+  flushPara(); flushQuote();
+  return blocks;
+}
+function countWords(blocks) {
+  let n = 0;
+  for (const b of blocks) {
+    if (b.type === 'img') continue;
+    const cjk = (b.text.match(/[一-鿿぀-ヿ가-힯]/g) || []).length;
+    const words = (b.text.replace(/[一-鿿぀-ヿ가-힯]/g, ' ').match(/[A-Za-z0-9]+/g) || []).length;
+    n += cjk + words;
+  }
+  return n;
+}
+
+/* ================================================================
+   內容擷取(§5)— Jina Reader 直連(CORS 已驗證可行);
+   設定頁可填自訂端點(方案 B 備援)。
+   ================================================================ */
+async function extractUrl(url) {
+  const custom = settings().extractEndpoint;
+  if (custom) {
+    const r = await fetch(custom, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    if (!r.ok) throw new Error('endpoint ' + r.status);
+    const j = await r.json();
+    return { title: j.title, author: j.author || null, markdown: j.markdown || j.content, coverUrl: j.coverUrl || null };
+  }
+  const r = await fetch('https://r.jina.ai/' + url, { headers: { 'Accept': 'application/json' } });
+  if (!r.ok) throw new Error('jina ' + r.status);
+  const { data } = await r.json();
+  if (!data?.content) throw new Error('empty content');
+  return {
+    title: data.title || url, author: data.metadata?.author || null,
+    markdown: data.content, coverUrl: data.metadata?.['og:image'] || null
+  };
+}
+
+async function saveUrl(url) {
+  url = (url || '').trim();
+  if (!url) return;
+  if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+  let host = '';
+  try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { toast('網址格式不正確'); return; }
+  if (/(^|\.)facebook\.com$|(^|\.)fb\.com$/.test(host)) {
+    toast('Facebook 貼文無法自動擷取,請手動貼上內文');
+    openManualDoc({ url });
+    return;
+  }
+  const id = uid();
+  try {
+    // 先寫 document(pending),UI 立刻看得到,再背景擷取(§4.1)
+    await setDoc(docRef(id), {
+      title: url, author: null, sourceUrl: url, siteName: host, coverUrl: null,
+      category: 'article', state: 'inbox', wordCount: 0, readingProgress: 0,
+      lastPosition: 0, frequency: 1, highlightCount: 0,
+      savedAt: serverTimestamp(), extractStatus: 'pending'
+    });
+  } catch (e) { toast('儲存失敗:' + (e.code || e.message)); return; }
+  switchView('inbox'); setInboxState('inbox');
+  toast('已加入收件匣,擷取中…');
+  runExtraction(id, url);
+}
+async function runExtraction(id, url) {
+  try {
+    const ex = await extractUrl(url);
+    const blocks = parseMarkdown(ex.markdown);
+    if (!blocks.length) throw new Error('內文為空');
+    const cover = ex.coverUrl || blocks.find(b => b.type === 'img')?.src || null;
+    await setDoc(contentRef(id), { markdown: ex.markdown, blocks });
+    await updateDoc(docRef(id), {
+      title: ex.title || url, author: ex.author, coverUrl: cover,
+      wordCount: countWords(blocks), extractStatus: 'ok'
+    });
+    contentCache.set(id, { markdown: ex.markdown, blocks });
+    toast('「' + (ex.title || url).slice(0, 18) + '」擷取完成');
+  } catch (e) {
+    try { await updateDoc(docRef(id), { extractStatus: 'failed' }); } catch (e2) {}
+    toast('擷取失敗:' + e.message);
+  }
+}
+
+/* ---------- 手動輸入文件 ---------- */
+function openManualDoc(pre) {
+  $('#md-title').value = ''; $('#md-author').value = '';
+  $('#md-url').value = pre?.url || ''; $('#md-body').value = '';
+  $('#mdoc-overlay').classList.remove('hidden');
+}
+$('#manual-doc-btn').onclick = () => openManualDoc();
+$('#md-cancel').onclick = () => $('#mdoc-overlay').classList.add('hidden');
+$('#md-save').onclick = async () => {
+  const title = $('#md-title').value.trim(), body = $('#md-body').value.trim();
+  if (!title || !body) { toast('請填寫標題與內文'); return; }
+  const url = $('#md-url').value.trim() || null;
+  let host = null;
+  if (url) { try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {} }
+  const blocks = parseMarkdown(body);
+  const id = uid();
+  try {
+    await setDoc(docRef(id), {
+      title, author: $('#md-author').value.trim() || null,
+      sourceUrl: url, siteName: host, coverUrl: null,
+      category: 'manual', state: 'inbox',
+      wordCount: countWords(blocks), readingProgress: 0, lastPosition: 0,
+      frequency: 1, highlightCount: 0, savedAt: serverTimestamp(), extractStatus: 'manual'
+    });
+    await setDoc(contentRef(id), { markdown: body, blocks });
+    contentCache.set(id, { markdown: body, blocks });
+    $('#mdoc-overlay').classList.add('hidden');
+    switchView('inbox'); setInboxState('inbox');
+    toast('已存入收件匣');
+  } catch (e) { toast('儲存失敗:' + (e.code || e.message)); }
+};
+
+$('#save-url-btn').onclick = () => { const v = $('#save-url').value; $('#save-url').value = ''; saveUrl(v); };
+$('#save-url').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#save-url-btn').click(); } });
+
+/* ---------- 收件匣 ---------- */
+function setInboxState(s) {
+  inboxState = s;
+  document.querySelectorAll('#statetabs button').forEach(b => b.classList.toggle('on', b.dataset.state === s));
+  renderInbox();
+}
+document.querySelectorAll('#statetabs button').forEach(b => b.onclick = () => setInboxState(b.dataset.state));
+
+function renderInbox() {
+  const list = $('#doc-list');
+  const docs = Object.values(DOCS).filter(d => (d.state || 'inbox') === inboxState)
+    .sort((a, b) => (b.savedAt?.seconds || 0) - (a.savedAt?.seconds || 0));
+  if (!docs.length) {
+    list.innerHTML = '<div class="empty"><div class="glyph">收</div><p>' +
+      (inboxState === 'inbox' ? '收件匣是空的。<br>貼上網址,或在 Safari 用分享捷徑存文章進來。' :
+       inboxState === 'later' ? '「稍後」是空的。' : '還沒有封存的文章。') + '</p></div>';
+    return;
+  }
+  const stateName = { inbox: '收件匣', later: '稍後', archive: '封存' };
+  list.innerHTML = docs.map(d => {
+    const mins = d.wordCount ? Math.max(1, Math.round(d.wordCount / 400)) : 0;
+    const status = d.extractStatus === 'pending' ? '<span class="warn">擷取中…</span>'
+      : d.extractStatus === 'failed' ? '<span class="warn">擷取失敗</span>' : '';
+    const sub = [esc(d.siteName || ''), mins ? '約 ' + mins + ' 分鐘' : '', (d.highlightCount || 0) > 0 ? (d.highlightCount + ' 劃線') : '', status]
+      .filter(Boolean).join(' · ');
+    const others = ['inbox', 'later', 'archive'].filter(s => s !== (d.state || 'inbox'));
+    return `
+    <div class="doccard" data-open="${d.id}">
+      <div class="thumb" ${d.coverUrl ? 'style="background-image:url(\'' + esc(d.coverUrl) + '\')"' : ''}>${d.coverUrl ? '' : '文'}</div>
+      <div class="body">
+        <h3>${esc(d.title)}</h3>
+        <div class="sub">${sub || '&nbsp;'}</div>
+        ${d.readingProgress > 0.005 ? '<div class="pbar"><i style="width:' + Math.round(d.readingProgress * 100) + '%"></i></div>' : ''}
+        <div class="ops">
+          ${others.map(s => '<button data-move="' + d.id + '" data-to="' + s + '">→' + stateName[s] + '</button>').join('')}
+          <button data-deldoc="${d.id}" class="danger">刪除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-move]').forEach(b => b.onclick = async e => {
+    e.stopPropagation();
+    try { await updateDoc(docRef(b.dataset.move), { state: b.dataset.to }); }
+    catch (err) { toast('儲存失敗,請重試'); }
+  });
+  list.querySelectorAll('[data-deldoc]').forEach(b => b.onclick = async e => {
+    e.stopPropagation();
+    const d = DOCS[b.dataset.deldoc];
+    if (!d) return;
+    const n = HL.filter(h => h.docId === d.id).length;
+    if (!confirm('刪除「' + d.title + '」' + (n ? '與其中 ' + n + ' 則劃線' : '') + '?此動作無法復原。')) return;
+    try {
+      const batch = writeBatch(db);
+      HL.filter(h => h.docId === d.id).forEach(h => batch.delete(hlRef(h.id)));
+      batch.delete(contentRef(d.id));
+      batch.delete(docRef(d.id));
+      await batch.commit();
+      contentCache.delete(d.id);
+      toast('已刪除');
+    } catch (err) { toast('刪除失敗,請重試'); }
+  });
+  list.querySelectorAll('[data-open]').forEach(c => c.onclick = () => {
+    const d = DOCS[c.dataset.open];
+    if (!d) return;
+    if (d.extractStatus === 'pending') { toast('還在擷取中,稍等幾秒…'); return; }
+    openDoc(d.id);
+  });
+}
+
+/* ================================================================
+   閱讀頁(§4.2)與劃線錨定(§4.3)
+   ================================================================ */
+function applyFontScale() {
+  document.documentElement.style.setProperty('--font-scale', settings().fontScale);
+}
+
+async function openDoc(docId, opt) {
+  const d = DOCS[docId];
+  if (!d) return;
+  let content = contentCache.get(docId);
+  if (!content) {
+    try {
+      const snap = await getDoc(contentRef(docId));
+      if (snap.exists()) { content = snap.data(); contentCache.set(docId, content); }
+    } catch (e) {}
+  }
+  READER = { docId, blocks: content?.blocks || [], pendingScrollHl: opt?.scrollToHl || null };
+  document.body.classList.add('reading');
+  ['inbox', 'review', 'highlights', 'export'].forEach(v => $('#view-' + v).classList.add('hidden'));
+  $('#view-reader').classList.remove('hidden');
+  $('#reader-title').textContent = d.title;
+  renderArticle(d, content);
+  window.scrollTo(0, 0);
+  if (content && d.lastPosition > 0 && !READER.pendingScrollHl) {
+    requestAnimationFrame(() => {
+      const el = document.querySelector('#article [data-block-index="' + d.lastPosition + '"]');
+      if (el) {
+        el.scrollIntoView();
+        window.scrollBy(0, -70);
+        const bn = $('#resume-banner');
+        if (bn) { bn.classList.remove('hidden'); setTimeout(() => bn.classList.add('hidden'), 3500); }
+      }
+    });
+  }
+  if (READER.pendingScrollHl) requestAnimationFrame(() => scrollToHighlight(READER.pendingScrollHl));
+}
+function closeReader(silent) {
+  if (READER && !silent) flushProgress();
+  READER = null;
+  hidePops();
+  $('#hl-drawer').classList.add('hidden');
+  document.body.classList.remove('reading');
+  $('#view-reader').classList.add('hidden');
+}
+$('#reader-back').onclick = () => { closeReader(); switchView(currentView); };
+
+function renderArticle(d, content) {
+  const art = $('#article');
+  const head = `
+    <div class="ahead">
+      <h2>${esc(d.title)}</h2>
+      <div class="ameta">${[esc(d.author || ''), esc(d.siteName || '')].filter(Boolean).join(' · ')}
+        ${d.sourceUrl ? ' · <a href="' + esc(d.sourceUrl) + '" target="_blank" rel="noopener">原文 →</a>' : ''}</div>
+    </div>
+    <div id="resume-banner" class="hidden">從上次讀到的地方繼續</div>`;
+  if (!content || !content.blocks?.length) {
+    if (d.extractStatus === 'failed') {
+      art.innerHTML = head + `
+        <div id="extract-fail">
+          <p>這篇文章無法自動擷取。<br>可以重試,或手動貼上內文。</p>
+          <button class="btn" id="retry-extract">重試擷取</button>
+          <button class="btn" id="fail-manual">手動貼上內文</button>
+        </div>`;
+      $('#retry-extract').onclick = async () => {
+        try { await updateDoc(docRef(d.id), { extractStatus: 'pending' }); } catch (e) {}
+        toast('重新擷取中…'); closeReader(true); switchView('inbox');
+        runExtraction(d.id, d.sourceUrl);
+      };
+      $('#fail-manual').onclick = () => openManualDoc({ url: d.sourceUrl });
+    } else {
+      // 遷移來的舊來源:沒有內文,列出它的劃線
+      const list = HL.filter(h => h.docId === d.id);
+      art.innerHTML = head + '<p style="font-size:13px;color:var(--ink-soft);margin-bottom:18px">此來源沒有內文(手動/匯入的劃線來源)。</p>' +
+        list.map(h => '<blockquote class="blk quote">' + esc(h.text) + '</blockquote>').join('');
+    }
+    return;
+  }
+  art.innerHTML = head + content.blocks.map(b => blockHTML(b)).join('');
+  applyAllMarks();
+}
+function blockHTML(b) {
+  if (b.type === 'img') {
+    return '<figure class="blkimg"><img src="' + esc(b.src) + '" alt="' + esc(b.text) + '" loading="lazy"></figure>';
+  }
+  const cls = { h1: 'h1', h2: 'h2', h3: 'h3', quote: 'quote', li: 'li', code: 'code' }[b.type] || 'p';
+  const tag = b.type === 'quote' ? 'blockquote' : b.type === 'code' ? 'pre' : 'div';
+  const inner = b.type === 'code' ? esc(b.text) : inlineHTML(b.md);
+  return '<' + tag + ' class="blk ' + cls + '" data-block-index="' + b.i + '">' + inner + '</' + tag + '>';
+}
+
+/* ---- 劃線渲染:offsets → DOM <mark>(跨行內格式邊界也能包)---- */
+function computeSegments(intervals, len) {
+  // 合併重疊區間 → [{s,e,ids}]:重疊劃線合併顯示(§4.3)
+  const sorted = intervals.filter(x => x.s < x.e).sort((a, b) => a.s - b.s || a.e - b.e);
+  const out = [];
+  for (const iv of sorted) {
+    const s = clamp(iv.s, 0, len), e = clamp(iv.e, 0, len);
+    if (s >= e) continue;
+    const last = out[out.length - 1];
+    if (last && s <= last.e) { last.e = Math.max(last.e, e); last.ids.push(iv.id); }
+    else out.push({ s, e, ids: [iv.id] });
+  }
+  return out;
+}
+function applyMarksToBlock(blockEl, segs) {
+  if (!segs.length) return;
+  const walker = document.createTreeWalker(blockEl, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let n;
+  while ((n = walker.nextNode())) nodes.push(n);
+  let offset = 0;
+  for (const node of nodes) {
+    const start = offset, end = offset + node.nodeValue.length;
+    offset = end;
+    const overlaps = segs.filter(sg => sg.s < end && sg.e > start);
+    if (!overlaps.length) continue;
+    const frag = document.createDocumentFragment();
+    let pos = 0;
+    for (const sg of overlaps) {
+      const s = Math.max(0, sg.s - start), e = Math.min(node.nodeValue.length, sg.e - start);
+      if (s > pos) frag.appendChild(document.createTextNode(node.nodeValue.slice(pos, s)));
+      const mark = document.createElement('mark');
+      mark.dataset.hlIds = sg.ids.join(',');
+      mark.textContent = node.nodeValue.slice(s, e);
+      frag.appendChild(mark);
+      pos = e;
+    }
+    if (pos < node.nodeValue.length) frag.appendChild(document.createTextNode(node.nodeValue.slice(pos)));
+    node.parentNode.replaceChild(frag, node);
+  }
+}
+function refreshBlockMarks(bi) {
+  if (!READER) return;
+  const el = document.querySelector('#article [data-block-index="' + bi + '"]');
+  const blk = READER.blocks[bi];
+  if (!el || !blk) return;
+  // 先還原乾淨 HTML 再套 mark,避免重複包
+  el.innerHTML = blk.type === 'code' ? esc(blk.text) : inlineHTML(blk.md);
+  const ivs = HL.filter(h => h.docId === READER.docId && h.blockIndex === bi)
+    .map(h => ({ s: h.startOffset, e: h.endOffset, id: h.id }));
+  applyMarksToBlock(el, computeSegments(ivs, blk.text.length));
+}
+function applyAllMarks() {
+  if (!READER) return;
+  const bis = new Set(HL.filter(h => h.docId === READER.docId && h.blockIndex != null).map(h => h.blockIndex));
+  for (const bi of bis) refreshBlockMarks(bi);
+}
+function scrollToHighlight(hlId) {
+  const mark = Array.from(document.querySelectorAll('#article mark[data-hl-ids]'))
+    .find(m => m.dataset.hlIds.split(',').includes(hlId));
+  if (mark) {
+    mark.scrollIntoView({ block: 'center' });
+    mark.classList.add('flash');
+    setTimeout(() => mark.classList.remove('flash'), 2600);
+  }
+}
+
+/* ---- 建立劃線:selection → (blockIndex, startOffset, endOffset)(§4.3)---- */
+function anchorFromSelection() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const range = sel.getRangeAt(0);
+  const el = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+  const blockEl = el?.closest?.('[data-block-index]');
+  if (!blockEl || !$('#article')?.contains(blockEl)) return null;
+  const bi = parseInt(blockEl.dataset.blockIndex, 10);
+  const blk = READER?.blocks[bi];
+  if (!blk) return null;
+  // 從 block 起點到 selection 起點的純文字長度 = startOffset(§4.3 步驟 3)
+  const pre = document.createRange();
+  pre.selectNodeContents(blockEl);
+  pre.setEnd(range.startContainer, range.startOffset);
+  const start = pre.toString().length;
+  let end;
+  const endInBlock = blockEl.contains(range.endContainer);
+  if (endInBlock) {
+    const pre2 = document.createRange();
+    pre2.selectNodeContents(blockEl);
+    pre2.setEnd(range.endContainer, range.endOffset);
+    end = pre2.toString().length;
+  } else {
+    end = blk.text.length; // 跨 block:截斷到本 block 結尾(§3.3)
+  }
+  if (end <= start) return null;
+  const text = blk.text.slice(start, end);
+  // 驗證錨點,不相等就中止(§4.3 步驟 4)
+  const selText = sel.toString();
+  const ok = endInBlock ? text === selText : selText.startsWith(text);
+  if (!ok) return null;
+  return { blockIndex: bi, startOffset: start, endOffset: end, text };
+}
+async function createHighlight(anchor, note) {
+  const id = uid();
+  try {
+    await setDoc(hlRef(id), {
+      docId: READER.docId, text: anchor.text, note: note || '', tags: [],
+      color: 'yellow', blockIndex: anchor.blockIndex,
+      startOffset: anchor.startOffset, endOffset: anchor.endOffset,
+      favorited: false, discarded: false, createdAt: serverTimestamp(),
+      srs: { halfLife: SRS.initialHalfLife, lastReviewed: null, reviewCount: 0 }
+    });
+    await updateDoc(docRef(READER.docId), { highlightCount: increment(1) });
+    toast('已劃線,將進入每日回顧');
+  } catch (e) { toast('劃線失敗:' + (e.code || e.message)); }
+}
+
+/* ---- 選字浮層 ---- */
+function hidePops() { $('#sel-pop').classList.add('hidden'); $('#mark-pop').classList.add('hidden'); }
+function positionPop(pop, rect) {
+  pop.classList.remove('hidden');
+  const top = rect.bottom + window.scrollY + 8;
+  let left = rect.left + window.scrollX + rect.width / 2 - pop.offsetWidth / 2;
+  left = clamp(left, 8, window.innerWidth - pop.offsetWidth - 8);
+  pop.style.top = top + 'px'; pop.style.left = left + 'px';
+}
+let _selTimer = null;
+document.addEventListener('selectionchange', () => {
+  if (!READER) return;
+  clearTimeout(_selTimer);
+  _selTimer = setTimeout(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) { $('#sel-pop').classList.add('hidden'); pendingSel = null; return; }
+    const anchor = anchorFromSelection();
+    if (!anchor) { $('#sel-pop').classList.add('hidden'); pendingSel = null; return; }
+    pendingSel = anchor;
+    positionPop($('#sel-pop'), sel.getRangeAt(0).getBoundingClientRect());
+  }, 250);
+});
+['#sp-hl', '#sp-note', '#sp-copy'].forEach(id => {
+  $(id).addEventListener('pointerdown', e => e.preventDefault()); // 保住 selection
+});
+$('#sp-hl').onclick = () => {
+  if (!pendingSel) return;
+  createHighlight(pendingSel);
+  window.getSelection()?.removeAllRanges();
+  hidePops();
+};
+$('#sp-note').onclick = () => {
+  if (!pendingSel) return;
+  const note = prompt('註解:');
+  if (note === null) return;
+  createHighlight(pendingSel, note.trim());
+  window.getSelection()?.removeAllRanges();
+  hidePops();
+};
+$('#sp-copy').onclick = async () => {
+  if (!pendingSel) return;
+  try { await navigator.clipboard.writeText(pendingSel.text); toast('已複製'); } catch (e) {}
+  window.getSelection()?.removeAllRanges();
+  hidePops();
+};
+
+/* ---- 點既有劃線 ---- */
+let activeMarkHl = null;
+document.addEventListener('click', e => {
+  const mark = e.target.closest?.('mark[data-hl-ids]');
+  if (mark && READER) {
+    e.preventDefault();
+    activeMarkHl = mark.dataset.hlIds.split(',')[0];
+    positionPop($('#mark-pop'), mark.getBoundingClientRect());
+    return;
+  }
+  if (!e.target.closest('#mark-pop') && !e.target.closest('#sel-pop')) $('#mark-pop').classList.add('hidden');
+  if (!e.target.closest('#hl-drawer') && !e.target.closest('#rb-hls')) $('#hl-drawer').classList.add('hidden');
+});
+$('#mp-note').onclick = async () => {
+  const h = hlById(activeMarkHl); hidePops();
+  if (!h) return;
+  const note = prompt('註解:', h.note || '');
+  if (note === null) return;
+  try { await updateDoc(hlRef(h.id), { note: note.trim() }); toast('已更新註解'); }
+  catch (e) { toast('儲存失敗,請重試'); }
+};
+$('#mp-tags').onclick = async () => {
+  const h = hlById(activeMarkHl); hidePops();
+  if (!h) return;
+  const t = prompt('標籤(逗號分隔):', (h.tags || []).join(', '));
+  if (t === null) return;
+  try { await updateDoc(hlRef(h.id), { tags: t.split(/[,,、]/).map(s => s.trim()).filter(Boolean) }); toast('已更新標籤'); }
+  catch (e) { toast('儲存失敗,請重試'); }
+};
+$('#mp-del').onclick = async () => {
+  const h = hlById(activeMarkHl); hidePops();
+  if (!h || !confirm('刪除這則劃線?')) return;
+  try {
+    await deleteDoc(hlRef(h.id));
+    await updateDoc(docRef(h.docId), { highlightCount: increment(-1) });
+    HL = HL.filter(x => x.id !== h.id);
+    if (h.blockIndex != null) refreshBlockMarks(h.blockIndex);
+    toast('已刪除');
+  } catch (e) { toast('刪除失敗,請重試'); }
+};
+
+/* ---- 本篇劃線抽屜 ---- */
+$('#rb-hls').onclick = e => {
+  e.stopPropagation();
+  const drawer = $('#hl-drawer');
+  if (!drawer.classList.contains('hidden')) { drawer.classList.add('hidden'); return; }
+  const list = HL.filter(h => h.docId === READER?.docId);
+  $('#hl-drawer-list').innerHTML = list.length ? list.map(h => `
+    <div class="dhl" data-goto="${h.id}">
+      <blockquote>${esc(h.text)}</blockquote>
+      ${h.note ? '<div class="dnote">' + esc(h.note) + '</div>' : ''}
+    </div>`).join('') : '<p style="font-size:13px;color:var(--ink-soft)">還沒有劃線。選取文字即可劃線。</p>';
+  drawer.classList.remove('hidden');
+  drawer.querySelectorAll('[data-goto]').forEach(el => el.onclick = () => {
+    drawer.classList.add('hidden');
+    scrollToHighlight(el.dataset.goto);
+  });
+};
+$('#rb-later').onclick = async () => {
+  if (!READER) return;
+  try { await updateDoc(docRef(READER.docId), { state: 'later' }); toast('已移到稍後'); }
+  catch (e) { toast('儲存失敗'); }
+};
+$('#rb-archive').onclick = async () => {
+  if (!READER) return;
+  const id = READER.docId;
+  try { await updateDoc(docRef(id), { state: 'archive' }); toast('已封存'); closeReader(); switchView('inbox'); }
+  catch (e) { toast('儲存失敗'); }
+};
+
+/* ---- 字級 ---- */
+async function bumpFont(delta) {
+  const v = clamp(Math.round((settings().fontScale + delta) * 10) / 10, 0.8, 1.4);
+  if (!META.settings) META.settings = {};
+  META.settings.fontScale = v;
+  applyFontScale();
+  try { await saveMeta(); } catch (e) {}
+}
+$('#reader-font-plus').onclick = () => bumpFont(0.1);
+$('#reader-font-minus').onclick = () => bumpFont(-0.1);
+
+/* ---- 閱讀進度(§6.2:throttle 3 秒,離開時強制寫)---- */
+const writeProgress = throttle(() => {
+  const p = currentProgress();
+  if (!p || !READER || !USER) return;
+  updateDoc(docRef(READER.docId), { readingProgress: p.progress, lastPosition: p.block }).catch(() => {});
+}, 3000);
+function currentProgress() {
+  if (!READER) return null;
+  const blockEls = document.querySelectorAll('#article [data-block-index]');
+  if (!blockEls.length) return null;
+  let block = 0;
+  for (const el of blockEls) {
+    if (el.getBoundingClientRect().top > 90) break;
+    block = parseInt(el.dataset.blockIndex, 10);
+  }
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = max > 0 ? clamp(window.scrollY / max, 0, 1) : 1;
+  return { block, progress: Math.round(progress * 1000) / 1000 };
+}
+function flushProgress() {
+  const p = currentProgress();
+  if (!p || !READER || !USER) return;
+  updateDoc(docRef(READER.docId), { readingProgress: p.progress, lastPosition: p.block }).catch(() => {});
+}
+window.addEventListener('scroll', () => {
+  if (!READER) return;
+  const p = currentProgress();
+  if (p) $('#reader-pbar').style.width = (p.progress * 100) + '%';
+  writeProgress();
+});
+window.addEventListener('pagehide', () => { if (READER) flushProgress(); });
+
+/* ================================================================
+   間隔重複 (§7) 與每日回顧 — 沿用既有引擎,來源改為 documents
+   ================================================================ */
 function recallP(h, now) {
   const ref = h.srs?.lastReviewed?.seconds ? h.srs.lastReviewed.seconds * 1000
             : (h.createdAt?.seconds ? h.createdAt.seconds * 1000 : now);
@@ -553,14 +1393,13 @@ function recallP(h, now) {
   return Math.pow(2, -days / (h.srs?.halfLife || SRS.initialHalfLife));
 }
 function seededRand(seed) { return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; }
-// 加權隨機抽 N 張:權重 = (1 - p) × book.frequency;每日固定亂數種子 → 多裝置同一組卡
 function pickDaily(cand) {
   const now = Date.now();
   const N = Math.min(settings().dailyCount, cand.length);
   const rnd = seededRand(parseInt(SESSION_DATE.replace(/-/g, ''), 10));
   const pool = [...cand].sort((a, b) => (a.id < b.id ? -1 : 1)).map(h => ({
     id: h.id,
-    w: Math.max(SRS.poolFloor, (1 - recallP(h, now)) * (BOOKS[h.bookId]?.frequency ?? 1))
+    w: Math.max(SRS.poolFloor, (1 - recallP(h, now)) * (DOCS[h.docId]?.frequency ?? 1))
   }));
   const out = [];
   while (out.length < N && pool.length) {
@@ -572,8 +1411,6 @@ function pickDaily(cand) {
   }
   return out;
 }
-
-/* ---------- 今日回顧 ---------- */
 const activeHL = () => HL.filter(h => !h.discarded && h.text !== undefined);
 
 async function ensureSession() {
@@ -584,15 +1421,12 @@ async function ensureSession() {
   creatingSession = true;
   try {
     await setDoc(sessRef(), {
-      date: SESSION_DATE,
-      cards: pickDaily(cand),
-      done: SESSION?.done || [],
-      createdAt: serverTimestamp()
+      date: SESSION_DATE, cards: pickDaily(cand),
+      done: SESSION?.done || [], createdAt: serverTimestamp()
     });
   } catch (e) { toast('建立今日回顧失敗:' + (e.code || e.message)); }
   creatingSession = false;
 }
-
 function sessionComplete(doneSet) {
   return SESSION.cards.every(id => {
     const h = hlById(id);
@@ -616,18 +1450,18 @@ function calcStreak() {
   const hist = META.streak?.history || {};
   let n = 0;
   const d = new Date();
-  if (!hist[dateKey(d)]) d.setDate(d.getDate() - 1); // 今天還沒完成 → 從昨天起算
+  if (!hist[dateKey(d)]) d.setDate(d.getDate() - 1);
   while (hist[dateKey(d)]) { n++; d.setDate(d.getDate() - 1); }
   return n;
 }
 
 function renderReview() {
-  if (SESSION_DATE !== todayStr()) { subscribeSession(); return; } // 跨日重新訂閱
+  if (SESSION_DATE !== todayStr()) { subscribeSession(); return; }
   const d = new Date();
   $('#today-date').textContent = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 週' + '日一二三四五六'[d.getDay()];
   $('#streak-chip').textContent = '🔥 ' + calcStreak();
   const stage = $('#review-stage');
-  if (!HL_LOADED || !SESSION_LOADED) {
+  if (!HL_LOADED || !SESSION_LOADED || !DOCS_LOADED) {
     $('#review-progress').textContent = '';
     stage.innerHTML = '<div class="empty"><p>載入中…</p></div>';
     return;
@@ -635,7 +1469,7 @@ function renderReview() {
   const cand = activeHL();
   if (!cand.length && !(SESSION?.cards || []).length) {
     $('#review-progress').textContent = '';
-    stage.innerHTML = '<div class="empty"><div class="glyph">拾</div><p>書庫還是空的。<br>到「新增」放進第一句你想反覆重讀的話。</p></div>';
+    stage.innerHTML = '<div class="empty"><div class="glyph">今</div><p>還沒有劃線。<br>存一篇文章、讀它、劃下重點,<br>明天它就會出現在這裡。</p></div>';
     return;
   }
   if (!SESSION || !(SESSION.cards || []).length) {
@@ -656,16 +1490,19 @@ function renderReview() {
     return;
   }
   const h = hlById(remaining[0]);
-  const book = BOOKS[h.bookId] || { title: '未分類', author: '', frequency: 1 };
-  const freq = book.frequency ?? 1;
+  const src = DOCS[h.docId] || { title: '未分類', author: '', frequency: 1 };
+  const freq = src.frequency ?? 1;
+  const canGoto = h.blockIndex != null && (src.extractStatus === 'ok' || src.extractStatus === 'manual');
   stage.innerHTML = `
     <article class="qcard">
       <div class="spine"></div>
-      <div class="vtag">${esc(book.title)}</div>
+      <div class="vtag">${esc(src.title)}</div>
       <div class="seal">${(h.srs?.reviewCount || 0)}<br>回</div>
       <blockquote>${esc(h.text)}</blockquote>
-      <div class="src"><b>${esc(book.title)}</b>${book.author ? ' · ' + esc(book.author) : ''}</div>
-      ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
+      <div class="src"><b>${esc(src.title)}</b>${src.author ? ' · ' + esc(src.author) : ''}${src.siteName ? ' · ' + esc(src.siteName) : ''}</div>
+      <div class="srclink">
+        ${canGoto ? '<button id="goto-src">回到原文 →</button>' : (src.sourceUrl ? '<a href="' + esc(src.sourceUrl) + '" target="_blank" rel="noopener">原文連結 →</a>' : '')}
+      </div>
       ${h.note ? '<div class="note">' + esc(h.note) + '</div>' : ''}
       ${h.tags && h.tags.length ? '<div class="tags">' + h.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : ''}
     </article>
@@ -674,19 +1511,16 @@ function renderReview() {
       <button class="btn primary" id="next-btn">已讀,下一句</button>
     </div>
     <div class="qactions sub">
-      <button class="btn sm" id="edit-btn">編輯</button>
+      <button class="btn sm" id="note-btn">註解</button>
       <button class="btn sm" id="discard-btn">移出輪替</button>
-      <button class="btn sm" id="tune-down" title="降低此出處出現頻率">頻率 ↓</button>
-      <button class="btn sm" id="tune-up" title="提高此出處出現頻率">頻率 ↑ ×${freq}</button>
+      <button class="btn sm" id="tune-down" title="降低此來源出現頻率">頻率 ↓</button>
+      <button class="btn sm" id="tune-up" title="提高此來源出現頻率">頻率 ↑ ×${freq}</button>
     </div>`;
   $('#next-btn').onclick = async () => {
     try {
-      // 成功回想 → 半衰期加倍 (§4.3)
       const half = clamp((h.srs?.halfLife || SRS.initialHalfLife) * SRS.growthFactor, SRS.minHalfLife, SRS.maxHalfLife);
       await updateDoc(hlRef(h.id), {
-        'srs.halfLife': half,
-        'srs.lastReviewed': serverTimestamp(),
-        'srs.reviewCount': increment(1)
+        'srs.halfLife': half, 'srs.lastReviewed': serverTimestamp(), 'srs.reviewCount': increment(1)
       });
       await markDone(h.id);
     } catch (e) { toast('儲存失敗,請重試'); }
@@ -696,24 +1530,31 @@ function renderReview() {
     catch (e) { toast('儲存失敗,請重試'); }
   };
   $('#discard-btn').onclick = async () => {
-    if (!confirm('移出回顧輪替?(仍會保留在書庫,可隨時恢復)')) return;
+    if (!confirm('移出回顧輪替?(仍會保留在原文與劃線庫)')) return;
     try {
       await updateDoc(hlRef(h.id), { discarded: true });
       await markDone(h.id);
       toast('已移出輪替');
     } catch (e) { toast('儲存失敗,請重試'); }
   };
-  $('#edit-btn').onclick = () => openEditor(h);
+  $('#note-btn').onclick = async () => {
+    const note = prompt('註解:', h.note || '');
+    if (note === null) return;
+    try { await updateDoc(hlRef(h.id), { note: note.trim() }); }
+    catch (e) { toast('儲存失敗,請重試'); }
+  };
   const tune = async dir => {
-    if (!BOOKS[h.bookId]) { toast('找不到此出處'); return; }
+    if (!DOCS[h.docId]) { toast('找不到此來源'); return; }
     const nf = clamp(freq * (dir > 0 ? 2 : 0.5), SRS.minFreq, SRS.maxFreq);
     try {
-      await updateDoc(bookRef(h.bookId), { frequency: nf });
-      toast('「' + book.title + '」出現頻率 ×' + nf);
+      await updateDoc(docRef(h.docId), { frequency: nf });
+      toast('「' + src.title.slice(0, 12) + '」出現頻率 ×' + nf);
     } catch (e) { toast('儲存失敗,請重試'); }
   };
   $('#tune-up').onclick = () => tune(1);
   $('#tune-down').onclick = () => tune(-1);
+  const gt = $('#goto-src');
+  if (gt) gt.onclick = () => openDoc(h.docId, { scrollToHl: h.id });
 }
 
 /* ---------- streak 日曆 ---------- */
@@ -740,153 +1581,139 @@ $('#streak-chip').onclick = showCalendar;
 $('#cal-close').onclick = () => $('#cal-overlay').classList.add('hidden');
 $('#cal-overlay').onclick = e => { if (e.target.id === 'cal-overlay') $('#cal-overlay').classList.add('hidden'); };
 
-/* ---------- 書庫 ---------- */
-function renderLibrary() {
+/* ---------- 劃線庫 ---------- */
+function renderHlLibrary() {
   const q = ($('#search').value || '').trim().toLowerCase();
-  const list = $('#library-list');
+  const list = $('#hl-list');
   let items = HL.filter(h => h.text !== undefined);
   if (q) items = items.filter(h => {
-    const b = BOOKS[h.bookId];
+    const d = DOCS[h.docId];
     return (h.text || '').toLowerCase().includes(q) ||
-      (b?.title || '').toLowerCase().includes(q) ||
-      (b?.author || '').toLowerCase().includes(q) ||
+      (d?.title || '').toLowerCase().includes(q) ||
+      (d?.author || '').toLowerCase().includes(q) ||
       (h.note || '').toLowerCase().includes(q) ||
       (h.tags || []).some(t => t.toLowerCase().includes(q));
   });
   if (items.length === 0) {
-    list.innerHTML = '<div class="empty"><div class="glyph">庫</div><p>' + (q ? '找不到符合的書摘。' : '書庫還是空的,從「新增」開始。') + '</p></div>';
+    list.innerHTML = '<div class="empty"><div class="glyph">庫</div><p>' + (q ? '找不到符合的劃線。' : '還沒有劃線。<br>在文章裡選取文字即可劃線。') + '</p></div>';
     return;
   }
   const groups = {};
-  items.forEach(h => { (groups[h.bookId] = groups[h.bookId] || []).push(h); });
-  const bids = Object.keys(groups).sort((a, b) => (BOOKS[a]?.title || '').localeCompare(BOOKS[b]?.title || '', 'zh-Hant'));
-  list.innerHTML = bids.map(bid => {
-    const b = BOOKS[bid] || { title: '未分類', author: '' };
-    const g = groups[bid];
-    const freq = b.frequency ?? 1;
-    return '<div class="group-title">' + esc(b.title) + (b.author ? ' <small>' + esc(b.author) + '</small>' : '') +
+  items.forEach(h => { (groups[h.docId] = groups[h.docId] || []).push(h); });
+  const dids = Object.keys(groups).sort((a, b) => (DOCS[a]?.title || '').localeCompare(DOCS[b]?.title || '', 'zh-Hant'));
+  list.innerHTML = dids.map(did => {
+    const d = DOCS[did] || { title: '未分類', author: '' };
+    const g = groups[did];
+    const freq = d.frequency ?? 1;
+    return '<div class="group-title">' + esc(d.title) + (d.author ? ' <small>' + esc(d.author) + '</small>' : '') +
       '<small>' + g.length + ' 則' + (freq !== 1 ? ' · 頻率×' + freq : '') + '</small></div>' +
       g.map(h => `
       <div class="lcard${h.discarded ? ' discarded' : ''}">
         <blockquote>${esc(h.text)}</blockquote>
-        ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
         ${h.note ? '<div class="lnote">' + esc(h.note) + '</div>' : ''}
         <div class="meta">
           <span>${h.favorited ? '♥ ' : ''}回顧 ${(h.srs?.reviewCount || 0)} 次${h.discarded ? ' · 已移出輪替' : ''}${h.tags && h.tags.length ? ' · ' + h.tags.map(esc).join('、') : ''}</span>
           <span class="ops">
-            <button data-fav="${h.id}">${h.favorited ? '取消收藏' : '收藏'}</button>
-            <button data-disc="${h.id}">${h.discarded ? '恢復輪替' : '移出'}</button>
-            <button data-edit="${h.id}">編輯</button>
-            <button data-del="${h.id}" class="danger">刪除</button>
+            ${h.blockIndex != null ? '<button data-lgoto="' + h.id + '">原文</button>' : ''}
+            <button data-lfav="${h.id}">${h.favorited ? '取消收藏' : '收藏'}</button>
+            <button data-ldisc="${h.id}">${h.discarded ? '恢復' : '移出'}</button>
+            <button data-lnote="${h.id}">註解</button>
+            <button data-ldel="${h.id}" class="danger">刪除</button>
           </span>
         </div>
       </div>`).join('');
   }).join('');
-  list.querySelectorAll('[data-fav]').forEach(b => b.onclick = async () => {
-    const h = hlById(b.dataset.fav); if (!h) return;
+  list.querySelectorAll('[data-lgoto]').forEach(b => b.onclick = () => {
+    const h = hlById(b.dataset.lgoto);
+    if (h) openDoc(h.docId, { scrollToHl: h.id });
+  });
+  list.querySelectorAll('[data-lfav]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.lfav); if (!h) return;
     try { await updateDoc(hlRef(h.id), { favorited: !h.favorited }); }
     catch (e) { toast('儲存失敗,請重試'); }
   });
-  list.querySelectorAll('[data-disc]').forEach(b => b.onclick = async () => {
-    const h = hlById(b.dataset.disc); if (!h) return;
+  list.querySelectorAll('[data-ldisc]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.ldisc); if (!h) return;
     try {
       await updateDoc(hlRef(h.id), { discarded: !h.discarded });
       toast(h.discarded ? '已恢復輪替' : '已移出輪替');
     } catch (e) { toast('儲存失敗,請重試'); }
   });
-  list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-    if (confirm('確定刪除這則書摘?')) {
-      const h = hlById(b.dataset.del);
-      try {
-        await deleteDoc(hlRef(b.dataset.del));
-        if (h && BOOKS[h.bookId]) await updateDoc(bookRef(h.bookId), { highlightCount: increment(-1) });
-        toast('已刪除');
-      } catch (e) { toast('刪除失敗,請重試'); }
-    }
+  list.querySelectorAll('[data-lnote]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.lnote); if (!h) return;
+    const note = prompt('註解:', h.note || '');
+    if (note === null) return;
+    try { await updateDoc(hlRef(h.id), { note: note.trim() }); }
+    catch (e) { toast('儲存失敗,請重試'); }
   });
-  list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
-    const h = hlById(b.dataset.edit);
-    if (h) openEditor(h);
+  list.querySelectorAll('[data-ldel]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.ldel);
+    if (!h || !confirm('確定刪除這則劃線?')) return;
+    try {
+      await deleteDoc(hlRef(h.id));
+      if (DOCS[h.docId]) await updateDoc(docRef(h.docId), { highlightCount: increment(-1) });
+      toast('已刪除');
+    } catch (e) { toast('刪除失敗,請重試'); }
   });
 }
 
-/* ---------- 新增/編輯 ---------- */
-function openEditor(h) {
-  const book = BOOKS[h.bookId];
-  editingId = h.id;
-  $('#f-quote').value = h.text || '';
-  $('#f-source').value = book?.title || '';
-  $('#f-author').value = book?.author || '';
-  $('#f-note').value = h.note || '';
-  $('#f-tags').value = (h.tags || []).join(', ');
-  $('#save-btn').textContent = '更新書摘';
-  switchView('add');
+/* ---------- 手動新增劃線(含舊版 ?quote= 捷徑)---------- */
+function openManualHl(pre) {
+  $('#mh-text').value = pre?.quote || '';
+  $('#mh-source').value = pre?.source || '';
+  $('#mh-author').value = ''; $('#mh-note').value = ''; $('#mh-tags').value = '';
+  $('#mhl-overlay').dataset.url = pre?.url || '';
+  $('#mhl-overlay').classList.remove('hidden');
 }
-async function findOrCreateBook(title, author, sourceUrl) {
-  const ex = Object.values(BOOKS).find(b => b.title === title && (b.author || '') === (author || ''));
-  if (ex) return ex.id;
-  const id = uid();
-  const data = {
-    title, author: author || '', category: sourceUrl ? 'article' : 'book',
-    coverUrl: null, sourceUrl: sourceUrl || null, frequency: 1,
-    highlightCount: 0, createdAt: serverTimestamp()
-  };
-  await setDoc(bookRef(id), data);
-  BOOKS[id] = { id, ...data }; // 先寫入本地,避免 snapshot 尚未回來前重複建立
-  return id;
-}
-$('#save-btn').onclick = async () => {
-  const text = $('#f-quote').value.trim(), title = $('#f-source').value.trim();
+$('#manual-hl-btn').onclick = () => openManualHl();
+$('#mh-cancel').onclick = () => $('#mhl-overlay').classList.add('hidden');
+$('#mh-save').onclick = async () => {
+  const text = $('#mh-text').value.trim(), title = $('#mh-source').value.trim();
   if (!text || !title) { toast('請填寫摘錄內容與出處'); return; }
-  const author = $('#f-author').value.trim();
-  const tags = $('#f-tags').value.split(/[,,、]/).map(s => s.trim()).filter(Boolean);
-  const note = $('#f-note').value.trim();
+  const author = $('#mh-author').value.trim() || null;
+  const url = $('#mhl-overlay').dataset.url || null;
   try {
-    if (editingId) {
-      const h = hlById(editingId);
-      const oldBook = h ? BOOKS[h.bookId] : null;
-      let bookId = h?.bookId;
-      if (!oldBook || oldBook.title !== title || (oldBook.author || '') !== author) {
-        bookId = await findOrCreateBook(title, author, h?.url);
-        if (oldBook) await updateDoc(bookRef(oldBook.id), { highlightCount: increment(-1) });
-        await updateDoc(bookRef(bookId), { highlightCount: increment(1) });
-      }
-      await updateDoc(hlRef(editingId), { text, note, tags, bookId });
-      toast('已更新');
-    } else {
-      const bookId = await findOrCreateBook(title, author, capturedUrl);
-      await setDoc(hlRef(uid()), {
-        text, note, tags, bookId, location: null,
-        url: capturedUrl || null, favorited: false, discarded: false,
-        createdAt: serverTimestamp(),
-        srs: { halfLife: SRS.initialHalfLife, lastReviewed: null, reviewCount: 0 }
+    let d = Object.values(DOCS).find(x => x.title === title && (x.author || null) === author && x.category === 'manual');
+    let did = d?.id;
+    if (!did) {
+      did = uid();
+      await setDoc(docRef(did), {
+        title, author, sourceUrl: url, siteName: null, coverUrl: null,
+        category: 'manual', state: 'archive', wordCount: 0, readingProgress: 0,
+        lastPosition: 0, frequency: 1, highlightCount: 0,
+        savedAt: serverTimestamp(), extractStatus: 'manual'
       });
-      await updateDoc(bookRef(bookId), { highlightCount: increment(1) });
-      toast('已存入書庫');
+      DOCS[did] = { id: did, title, author, category: 'manual', frequency: 1, extractStatus: 'manual' };
     }
-    capturedUrl = '';
-    editingId = null;
-    $('#add-form').querySelectorAll('input,textarea').forEach(el => el.value = '');
-    $('#save-btn').textContent = '存入書庫';
-    switchView('library');
+    await setDoc(hlRef(uid()), {
+      docId: did, text, note: $('#mh-note').value.trim(),
+      tags: $('#mh-tags').value.split(/[,,、]/).map(s => s.trim()).filter(Boolean),
+      color: 'yellow', blockIndex: null, startOffset: null, endOffset: null,
+      favorited: false, discarded: false, createdAt: serverTimestamp(),
+      srs: { halfLife: SRS.initialHalfLife, lastReviewed: null, reviewCount: 0 }
+    });
+    await updateDoc(docRef(did), { highlightCount: increment(1) });
+    $('#mhl-overlay').classList.add('hidden');
+    toast('已存入,將進入每日回顧');
   } catch (e) { toast('儲存失敗:' + (e.code || e.message)); }
 };
 
 /* ---------- 匯出/設定 ---------- */
 function toMarkdown() {
   const groups = {};
-  HL.filter(h => h.text !== undefined).forEach(h => { (groups[h.bookId] = groups[h.bookId] || []).push(h); });
-  const bids = Object.keys(groups).sort((a, b) => (BOOKS[a]?.title || '').localeCompare(BOOKS[b]?.title || '', 'zh-Hant'));
-  return bids.map(bid => {
-    const b = BOOKS[bid] || { title: '未分類', author: '' };
-    let md = '## ' + b.title + (b.author ? ' — ' + b.author : '') + '\n\n';
-    groups[bid].forEach(h => {
+  HL.filter(h => h.text !== undefined).forEach(h => { (groups[h.docId] = groups[h.docId] || []).push(h); });
+  const dids = Object.keys(groups).sort((a, b) => (DOCS[a]?.title || '').localeCompare(DOCS[b]?.title || '', 'zh-Hant'));
+  return dids.map(did => {
+    const d = DOCS[did] || { title: '未分類' };
+    let md = '## ' + d.title + (d.author ? ' — ' + d.author : '') + '\n\n';
+    if (d.sourceUrl) md += d.sourceUrl + '\n\n';
+    groups[did].forEach(h => {
       md += '> ' + h.text.replace(/\n/g, '\n> ') + '\n\n';
       if (h.note) md += '筆記:' + h.note + '\n\n';
       if (h.tags && h.tags.length) md += '標籤:' + h.tags.map(t => '#' + t).join(' ') + '\n\n';
     });
     return md;
-  }).join('---\n\n') || '(尚無書摘)';
+  }).join('---\n\n') || '(尚無劃線)';
 }
 async function copyText(txt, msg) {
   try { await navigator.clipboard.writeText(txt); toast(msg); }
@@ -896,38 +1723,37 @@ async function copyText(txt, msg) {
   }
 }
 $('#copy-md').onclick = () => copyText(toMarkdown(), 'Markdown 已複製');
-$('#copy-json').onclick = () => copyText(JSON.stringify({ books: Object.values(BOOKS), highlights: HL, meta: META }, null, 2), 'JSON 已複製');
+$('#copy-json').onclick = () => copyText(JSON.stringify({ documents: Object.values(DOCS), highlights: HL, meta: META }, null, 2), 'JSON 已複製');
 $('#save-settings').onclick = async () => {
   const v = clamp(parseInt($('#set-daily').value, 10) || SRS.defaultDaily, 3, 50);
   $('#set-daily').value = v;
   if (!META.settings) META.settings = {};
   META.settings.dailyCount = v;
-  try { await saveMeta(); toast('已儲存,明日回顧生效'); }
+  META.settings.extractEndpoint = $('#set-extract').value.trim();
+  try { await saveMeta(); toast('已儲存(每日數量明日生效)'); }
   catch (e) { toast('儲存失敗,請重試'); }
 };
 function renderExport() {
   const items = HL.filter(h => h.text !== undefined);
   const rv = items.reduce((s, h) => s + (h.srs?.reviewCount || 0), 0);
-  $('#stats').textContent = items.length + ' 則書摘 · ' + Object.keys(BOOKS).length + ' 個出處 · 累計回顧 ' + rv + ' 次 · 連續 ' + calcStreak() + ' 天';
-  const inp = $('#set-daily');
-  if (document.activeElement !== inp) inp.value = settings().dailyCount;
+  $('#stats').textContent = Object.keys(DOCS).length + ' 篇文章/來源 · ' + items.length + ' 則劃線 · 累計回顧 ' + rv + ' 次 · 連續 ' + calcStreak() + ' 天';
+  if (document.activeElement !== $('#set-daily')) $('#set-daily').value = settings().dailyCount;
+  if (document.activeElement !== $('#set-extract')) $('#set-extract').value = settings().extractEndpoint;
 }
 
 /* ---------- 分頁切換 ---------- */
 function switchView(v) {
+  if (READER) closeReader();
   currentView = v;
-  ['review', 'library', 'add', 'export'].forEach(x => {
+  ['inbox', 'review', 'highlights', 'export'].forEach(x => {
     $('#view-' + x).classList.toggle('hidden', x !== v);
-    document.querySelector('nav [data-view="' + x + '"]').classList.toggle('on', x === v);
+    document.querySelector('nav [data-view="' + x + '"]')?.classList.toggle('on', x === v);
   });
   rerender();
   window.scrollTo(0, 0);
 }
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  if (b.dataset.view === 'add') { editingId = null; capturedUrl = ''; $('#save-btn').textContent = '存入書庫'; }
-  switchView(b.dataset.view);
-});
-$('#search').addEventListener('input', renderLibrary);
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => switchView(b.dataset.view));
+$('#search').addEventListener('input', renderHlLibrary);
 </script>
 </body>
 </html>
