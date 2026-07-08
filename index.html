@@ -75,7 +75,9 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 /* ---- 回顧卡片 ---- */
 .review-head{display:flex;justify-content:space-between;align-items:center;margin:6px 2px 14px}
 .review-head .date{font-size:13px;color:var(--ink-soft);letter-spacing:.06em}
+.review-head .right{display:flex;gap:12px;align-items:center}
 .review-head .count{font-size:13px;color:var(--indigo);font-weight:500}
+.streakbtn{background:none;border:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--shu);cursor:pointer;padding:2px 4px}
 .qcard{
   position:relative;background:var(--card);border:1px solid var(--mist);
   border-radius:var(--radius);padding:26px 24px 22px 34px;margin-bottom:14px;
@@ -98,7 +100,8 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
   display:flex;align-items:center;justify-content:center;text-align:center;
   transform:rotate(-4deg);opacity:.85;
 }
-.qactions{display:flex;gap:10px;margin-bottom:22px}
+.qactions{display:flex;gap:10px;margin-bottom:10px}
+.qactions.sub{margin-bottom:22px}
 .btn{
   flex:1;font-family:var(--sans);font-size:15px;font-weight:500;
   padding:12px 0;border-radius:12px;cursor:pointer;
@@ -107,6 +110,7 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .btn.primary{background:var(--indigo-deep);border-color:var(--indigo-deep);color:#fff}
 .btn.fav{flex:0 0 52px}
 .btn.fav.on{color:var(--shu);border-color:var(--shu)}
+.btn.sm{font-size:13px;padding:9px 0;color:var(--ink-soft)}
 .btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .done-banner{text-align:center;padding:56px 20px}
 .done-banner .stamp{
@@ -117,16 +121,29 @@ nav button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 }
 .done-banner p{color:var(--ink-soft);font-size:14px;margin-top:6px}
 
+/* ---- streak 日曆 ---- */
+#cal-overlay{position:fixed;inset:0;background:rgba(23,36,47,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:24px}
+#cal-box{background:var(--card);border-radius:var(--radius);padding:20px;max-width:380px;width:100%;max-height:80vh;overflow:auto}
+#cal-box h3{font-family:var(--serif);font-size:17px;color:var(--indigo-deep);margin-bottom:4px}
+#cal-box .cal-sub{font-size:12px;color:var(--ink-soft);margin-bottom:12px}
+.cal-month h4{font-family:var(--serif);font-size:14px;color:var(--indigo-deep);margin:12px 0 6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-grid span{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-soft);border-radius:6px}
+.cal-grid span.hit{background:var(--shu);color:#fff;font-weight:500}
+.cal-grid span.future{opacity:.3}
+#cal-close{width:100%;margin-top:16px}
+
 /* ---- 書庫 ---- */
 .searchbar{display:flex;gap:8px;margin-bottom:14px}
 .searchbar input{flex:1;font-family:var(--sans);font-size:15px;padding:11px 14px;border-radius:12px;border:1px solid var(--mist);background:var(--card);color:var(--ink)}
 .searchbar input:focus{outline:2px solid var(--indigo);outline-offset:1px}
-.group-title{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--indigo-deep);margin:20px 2px 10px;display:flex;justify-content:space-between;align-items:baseline}
-.group-title small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--ink-soft)}
+.group-title{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--indigo-deep);margin:20px 2px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.group-title small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--ink-soft);white-space:nowrap}
 .lcard{background:var(--card);border:1px solid var(--mist);border-radius:12px;padding:16px 16px 12px;margin-bottom:10px}
+.lcard.discarded{opacity:.55}
 .lcard blockquote{font-family:var(--serif);font-size:15.5px;line-height:1.85;margin-bottom:8px;white-space:pre-wrap}
 .lcard .lnote{margin:0 0 8px;padding:8px 10px;background:var(--paper);border-radius:8px;font-size:13px;color:var(--ink-soft);white-space:pre-wrap}
-.lcard .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-soft)}
+.lcard .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;gap:6px}
 .lcard .meta .ops{display:flex;gap:14px}
 .lcard .meta button{background:none;border:none;cursor:pointer;font-size:12px;color:var(--indigo);font-family:var(--sans);padding:4px 0}
 .lcard .meta button.danger{color:var(--shu)}
@@ -141,10 +158,13 @@ form textarea{resize:vertical;min-height:110px;font-family:var(--serif);line-hei
 form input:focus,form textarea:focus{outline:2px solid var(--indigo);outline-offset:1px}
 form .submit{width:100%;margin-top:22px;padding:14px 0}
 
-/* ---- 匯出 ---- */
+/* ---- 匯出/設定 ---- */
 .export-box{background:var(--card);border:1px solid var(--mist);border-radius:var(--radius);padding:18px;margin-bottom:14px}
 .export-box h3{font-family:var(--serif);font-size:16px;color:var(--indigo-deep);margin-bottom:6px}
 .export-box p{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+.export-box .setrow{display:flex;gap:10px;align-items:center}
+.export-box .setrow input{width:90px;font-family:var(--sans);font-size:15px;padding:9px 12px;border-radius:10px;border:1px solid var(--mist);background:var(--paper);color:var(--ink)}
+.export-box .setrow .btn{flex:0 0 auto;padding:9px 20px;font-size:14px}
 
 .toast{
   position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));
@@ -178,7 +198,10 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
   <section id="view-review" class="hidden">
     <div class="review-head">
       <div class="date" id="today-date"></div>
-      <div class="count" id="review-progress"></div>
+      <div class="right">
+        <button class="streakbtn" id="streak-chip" title="回顧日曆"></button>
+        <div class="count" id="review-progress"></div>
+      </div>
     </div>
     <div id="review-stage"></div>
   </section>
@@ -186,7 +209,7 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
   <!-- 書庫 -->
   <section id="view-library" class="hidden">
     <div class="searchbar">
-      <input id="search" type="search" placeholder="搜尋內容、出處、標籤…" aria-label="搜尋書摘">
+      <input id="search" type="search" placeholder="搜尋內容、出處、作者、標籤…" aria-label="搜尋書摘">
     </div>
     <div id="library-list"></div>
   </section>
@@ -208,8 +231,16 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
     </form>
   </section>
 
-  <!-- 匯出 -->
+  <!-- 匯出/設定 -->
   <section id="view-export" class="hidden">
+    <div class="export-box">
+      <h3>設定</h3>
+      <p>每日回顧卡片數量(3–50,隔日生效)。</p>
+      <div class="setrow">
+        <input id="set-daily" type="number" min="3" max="50" inputmode="numeric">
+        <button class="btn" id="save-settings">儲存</button>
+      </div>
+    </div>
     <div class="export-box">
       <h3>Markdown</h3>
       <p>依出處分組,可直接貼到 Notion 或 Obsidian。</p>
@@ -217,7 +248,7 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
     </div>
     <div class="export-box">
       <h3>JSON 備份</h3>
-      <p>完整資料備份,可自行處理或保存。</p>
+      <p>完整資料備份(含書目與 SRS 狀態)。</p>
       <button class="btn" id="copy-json">複製 JSON</button>
     </div>
     <div class="export-box">
@@ -233,6 +264,15 @@ form .submit{width:100%;margin-top:22px;padding:14px 0}
   <button data-view="add"><span class="ic">拾</span>新增</button>
   <button data-view="export"><span class="ic">出</span>匯出</button>
 </nav>
+
+<div id="cal-overlay" class="hidden">
+  <div id="cal-box">
+    <h3>回顧日曆</h3>
+    <div class="cal-sub" id="cal-streak"></div>
+    <div id="cal-body"></div>
+    <button class="btn" id="cal-close">關閉</button>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -258,7 +298,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
-  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp
+  collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot,
+  serverTimestamp, writeBatch, arrayUnion, increment, deleteField, Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const app = initializeApp(firebaseConfig);
@@ -273,15 +314,33 @@ try {
   db = getFirestore(app);
 }
 
+/* ---------- SRS 參數 (§4) ---------- */
+const SRS = {
+  initialHalfLife: 1,     // 新劃線半衰期(天)→ 隔天就進入回顧候選
+  growthFactor: 2,        // 每次成功回想,半衰期加倍
+  minHalfLife: 0.25,
+  maxHalfLife: 1825,      // 5 年封頂
+  minFreq: 0.25, maxFreq: 4,
+  defaultDaily: 15,
+  poolFloor: 0.0001       // 權重下限,避免剛看過的卡權重歸零導致抽樣崩潰
+};
+
 /* ---------- 狀態 ---------- */
 let USER = null;
-let HL = [];                 // highlights(由 onSnapshot 即時更新)
-let META = { reviewLog: {} };
-let dailyIdx = 0;
+let BOOKS = {};              // bookId → book
+let HL = [];                 // highlights(onSnapshot 即時更新)
+let HL_LOADED = false;
+let META = {};               // meta/state:settings + streak
+let SESSION = null;          // 當日 reviewSessions/{date}
+let SESSION_LOADED = false;
+let SESSION_DATE = null;
+let unsubHL = null, unsubBooks = null, unsubMeta = null, unsubSession = null;
 let editingId = null;
-let unsubHL = null, unsubMeta = null;
 let currentView = 'review';
 let capturedUrl = '';
+let creatingSession = false;
+let migrationRan = false;
+let metaMigrating = false;
 
 /* ---------- 分享擷取(iOS 捷徑用) ---------- */
 const _params = new URLSearchParams(location.search);
@@ -306,10 +365,18 @@ function applyPendingCapture() {
   toast('已帶入摘錄,確認出處後存檔');
 }
 
+/* ---------- 小工具 ---------- */
 const $ = s => document.querySelector(s);
-const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const dateKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const todayStr = () => dateKey(new Date());
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const esc = s => (s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const hlRef = id => doc(db, 'users', USER.uid, 'highlights', id);
+const bookRef = id => doc(db, 'users', USER.uid, 'books', id);
+const sessRef = () => doc(db, 'users', USER.uid, 'reviewSessions', SESSION_DATE);
+const hlById = id => HL.find(h => h.id === id);
+const settings = () => ({ dailyCount: clamp(META.settings?.dailyCount || SRS.defaultDaily, 3, 50) });
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
 
 /* ---------- 登入/登出 ---------- */
@@ -345,8 +412,10 @@ onAuthStateChanged(auth, user => {
     switchView('review');
     applyPendingCapture();
   } else {
-    if (unsubHL) unsubHL(); if (unsubMeta) unsubMeta();
-    HL = []; META = { reviewLog: {} };
+    [unsubHL, unsubBooks, unsubMeta, unsubSession].forEach(u => u && u());
+    unsubHL = unsubBooks = unsubMeta = unsubSession = null;
+    BOOKS = {}; HL = []; META = {}; SESSION = null;
+    HL_LOADED = SESSION_LOADED = false; migrationRan = false;
     $('#tabbar').classList.add('hidden');
     $('#userchip').classList.add('hidden');
     ['review', 'library', 'add', 'export'].forEach(v => $('#view-' + v).classList.add('hidden'));
@@ -356,15 +425,32 @@ onAuthStateChanged(auth, user => {
 
 /* ---------- Firestore 即時訂閱 ---------- */
 function subscribe() {
-  const base = 'users/' + USER.uid;
-  unsubHL = onSnapshot(collection(db, base, 'highlights'), snap => {
-    HL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    HL.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  unsubBooks = onSnapshot(collection(db, 'users', USER.uid, 'books'), snap => {
+    BOOKS = {};
+    snap.docs.forEach(d => BOOKS[d.id] = { id: d.id, ...d.data() });
     rerender();
   }, err => toast('讀取失敗:' + err.code));
-  unsubMeta = onSnapshot(doc(db, base, 'meta', 'state'), snap => {
-    META = snap.exists() ? snap.data() : { reviewLog: {} };
-    if (!META.reviewLog) META.reviewLog = {};
+  unsubHL = onSnapshot(collection(db, 'users', USER.uid, 'highlights'), snap => {
+    HL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    HL.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0) || (a.id < b.id ? -1 : 1));
+    HL_LOADED = true;
+    migrateIfNeeded();
+    rerender();
+  }, err => toast('讀取失敗:' + err.code));
+  unsubMeta = onSnapshot(doc(db, 'users', USER.uid, 'meta', 'state'), snap => {
+    META = snap.exists() ? snap.data() : {};
+    migrateMetaIfNeeded();
+    rerender();
+  });
+  subscribeSession();
+}
+function subscribeSession() {
+  if (unsubSession) unsubSession();
+  SESSION_DATE = todayStr();
+  SESSION = null; SESSION_LOADED = false;
+  unsubSession = onSnapshot(sessRef(), snap => {
+    SESSION = snap.exists() ? snap.data() : null;
+    SESSION_LOADED = true;
     rerender();
   });
 }
@@ -375,150 +461,407 @@ function rerender() {
 }
 
 async function saveMeta() {
-  // 只保留最近 90 天的回顧紀錄,避免文件無限長大
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
-  const co = cutoff.toISOString().slice(0, 10);
-  for (const k of Object.keys(META.reviewLog)) if (k < co) delete META.reviewLog[k];
+  // streak 歷史只保留最近 365 天
+  const hist = META.streak?.history || {};
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 365);
+  const co = dateKey(cutoff);
+  for (const k of Object.keys(hist)) if (k < co) delete hist[k];
   await setDoc(doc(db, 'users', USER.uid, 'meta', 'state'), META);
 }
 
-/* ---------- 今日回顧 ---------- */
-function seededRand(seed) { return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; }
-function buildDailyPick() {
-  const seed = parseInt(todayStr().replace(/-/g, ''), 10);
-  const rnd = seededRand(seed);
-  const pool = [...HL].sort((a, b) => (a.reviews || 0) - (b.reviews || 0) || rnd() - 0.5);
-  return pool.slice(0, Math.min(5, pool.length));
+/* ---------- 舊資料遷移:單層 highlights → books + highlights ---------- */
+async function migrateIfNeeded() {
+  if (migrationRan) return;
+  const old = HL.filter(h => h.quote !== undefined && h.text === undefined);
+  if (!old.length) return;
+  migrationRan = true;
+  toast('偵測到舊資料,升級中…');
+  try {
+    const groups = new Map();
+    for (const h of old) {
+      const k = (h.source || '未命名') + '\u0000' + (h.author || '');
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(h);
+    }
+    const ops = [];
+    const bookIdByKey = new Map();
+    for (const [k, list] of groups) {
+      const [title, author] = k.split('\u0000');
+      const ex = Object.values(BOOKS).find(b => b.title === title && (b.author || '') === author);
+      const bid = ex ? ex.id : uid();
+      bookIdByKey.set(k, bid);
+      if (ex) {
+        ops.push({ type: 'update', ref: bookRef(bid), data: { highlightCount: increment(list.length) } });
+      } else {
+        ops.push({ type: 'set', ref: bookRef(bid), data: {
+          title, author, category: list.some(h => h.url) ? 'article' : 'book',
+          coverUrl: null, sourceUrl: null, frequency: 1,
+          highlightCount: list.length, createdAt: serverTimestamp()
+        }});
+      }
+    }
+    for (const h of old) {
+      const k = (h.source || '未命名') + '\u0000' + (h.author || '');
+      const rc = h.reviews || 0;
+      let lastR = null;
+      if (h.lastReviewed) {
+        const d = new Date(h.lastReviewed + 'T12:00:00');
+        if (!isNaN(d)) lastR = Timestamp.fromDate(d);
+      }
+      ops.push({ type: 'update', ref: hlRef(h.id), data: {
+        text: h.quote, note: h.note || '', bookId: bookIdByKey.get(k),
+        tags: h.tags || [], location: null, url: h.url || null,
+        favorited: !!h.fav, discarded: false,
+        srs: {
+          halfLife: clamp(SRS.initialHalfLife * Math.pow(SRS.growthFactor, rc), SRS.minHalfLife, SRS.maxHalfLife),
+          lastReviewed: lastR, reviewCount: rc
+        },
+        quote: deleteField(), source: deleteField(), author: deleteField(),
+        reviews: deleteField(), fav: deleteField(), lastReviewed: deleteField(), created: deleteField()
+      }});
+    }
+    for (let i = 0; i < ops.length; i += 400) {
+      const b = writeBatch(db);
+      ops.slice(i, i + 400).forEach(o => o.type === 'set' ? b.set(o.ref, o.data) : b.update(o.ref, o.data));
+      await b.commit();
+    }
+    toast('資料升級完成:' + old.length + ' 則劃線、' + groups.size + ' 個出處');
+  } catch (e) {
+    migrationRan = false;
+    toast('資料升級失敗:' + (e.code || e.message));
+  }
 }
-function renderReview() {
+async function migrateMetaIfNeeded() {
+  if (metaMigrating || !META.reviewLog) return;
+  metaMigrating = true;
+  const history = META.streak?.history || {};
+  for (const [k, v] of Object.entries(META.reviewLog)) {
+    if (v && v.done && v.done.length > 0) history[k] = true;
+  }
+  META.streak = { history };
+  delete META.reviewLog;
+  try { await saveMeta(); } catch (e) {}
+  metaMigrating = false;
+}
+
+/* ---------- 間隔重複演算法 (§4) ---------- */
+// 回想機率 p(t) = 2^(-elapsedDays / halfLife)
+function recallP(h, now) {
+  const ref = h.srs?.lastReviewed?.seconds ? h.srs.lastReviewed.seconds * 1000
+            : (h.createdAt?.seconds ? h.createdAt.seconds * 1000 : now);
+  const days = Math.max(0, (now - ref) / 86400000);
+  return Math.pow(2, -days / (h.srs?.halfLife || SRS.initialHalfLife));
+}
+function seededRand(seed) { return () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }; }
+// 加權隨機抽 N 張:權重 = (1 - p) × book.frequency;每日固定亂數種子 → 多裝置同一組卡
+function pickDaily(cand) {
+  const now = Date.now();
+  const N = Math.min(settings().dailyCount, cand.length);
+  const rnd = seededRand(parseInt(SESSION_DATE.replace(/-/g, ''), 10));
+  const pool = [...cand].sort((a, b) => (a.id < b.id ? -1 : 1)).map(h => ({
+    id: h.id,
+    w: Math.max(SRS.poolFloor, (1 - recallP(h, now)) * (BOOKS[h.bookId]?.frequency ?? 1))
+  }));
+  const out = [];
+  while (out.length < N && pool.length) {
+    const total = pool.reduce((s, x) => s + x.w, 0);
+    let r = rnd() * total, i = 0;
+    for (; i < pool.length - 1; i++) { r -= pool[i].w; if (r <= 0) break; }
+    out.push(pool[i].id);
+    pool.splice(i, 1);
+  }
+  return out;
+}
+
+/* ---------- 今日回顧 ---------- */
+const activeHL = () => HL.filter(h => !h.discarded && h.text !== undefined);
+
+async function ensureSession() {
+  if (!SESSION_LOADED || creatingSession) return;
+  if (SESSION && (SESSION.cards || []).length) return;
+  const cand = activeHL();
+  if (!cand.length) return;
+  creatingSession = true;
+  try {
+    await setDoc(sessRef(), {
+      date: SESSION_DATE,
+      cards: pickDaily(cand),
+      done: SESSION?.done || [],
+      createdAt: serverTimestamp()
+    });
+  } catch (e) { toast('建立今日回顧失敗:' + (e.code || e.message)); }
+  creatingSession = false;
+}
+
+function sessionComplete(doneSet) {
+  return SESSION.cards.every(id => {
+    const h = hlById(id);
+    return doneSet.has(id) || !h || h.discarded;
+  });
+}
+async function markDone(id) {
+  const doneSet = new Set([...(SESSION.done || []), id]);
+  await updateDoc(sessRef(), { done: arrayUnion(id) });
+  if (sessionComplete(doneSet)) await recordCompletion();
+}
+async function recordCompletion() {
   const t = todayStr();
+  if (META.streak?.history?.[t]) return;
+  if (!META.streak) META.streak = { history: {} };
+  if (!META.streak.history) META.streak.history = {};
+  META.streak.history[t] = true;
+  try { await saveMeta(); } catch (e) {}
+}
+function calcStreak() {
+  const hist = META.streak?.history || {};
+  let n = 0;
+  const d = new Date();
+  if (!hist[dateKey(d)]) d.setDate(d.getDate() - 1); // 今天還沒完成 → 從昨天起算
+  while (hist[dateKey(d)]) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+function renderReview() {
+  if (SESSION_DATE !== todayStr()) { subscribeSession(); return; } // 跨日重新訂閱
   const d = new Date();
   $('#today-date').textContent = d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 週' + '日一二三四五六'[d.getDay()];
+  $('#streak-chip').textContent = '🔥 ' + calcStreak();
   const stage = $('#review-stage');
-  if (HL.length === 0) {
+  if (!HL_LOADED || !SESSION_LOADED) {
+    $('#review-progress').textContent = '';
+    stage.innerHTML = '<div class="empty"><p>載入中…</p></div>';
+    return;
+  }
+  const cand = activeHL();
+  if (!cand.length && !(SESSION?.cards || []).length) {
     $('#review-progress').textContent = '';
     stage.innerHTML = '<div class="empty"><div class="glyph">拾</div><p>書庫還是空的。<br>到「新增」放進第一句你想反覆重讀的話。</p></div>';
     return;
   }
-  const pick = buildDailyPick();
-  const done = (META.reviewLog[t] && META.reviewLog[t].done) || [];
-  dailyIdx = pick.findIndex(h => !done.includes(h.id));
-  if (dailyIdx < 0) dailyIdx = pick.length;
-  $('#review-progress').textContent = '今日 ' + Math.min(done.length, pick.length) + ' / ' + pick.length;
-  if (dailyIdx >= pick.length) {
+  if (!SESSION || !(SESSION.cards || []).length) {
+    ensureSession();
+    stage.innerHTML = '<div class="empty"><p>準備今日卡片…</p></div>';
+    return;
+  }
+  const doneSet = new Set(SESSION.done || []);
+  const remaining = SESSION.cards.filter(id => {
+    const h = hlById(id);
+    return !doneSet.has(id) && h && !h.discarded;
+  });
+  const doneCount = SESSION.cards.length - remaining.length;
+  $('#review-progress').textContent = '今日 ' + doneCount + ' / ' + SESSION.cards.length;
+  if (!remaining.length) {
+    recordCompletion();
     stage.innerHTML = '<div class="done-banner"><div class="stamp">回顧<br>畢</div><div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--indigo-deep)">今日回顧完成</div><p>連續回顧 ' + calcStreak() + ' 天。明天會有新的一組句子。</p></div>';
     return;
   }
-  const h = pick[dailyIdx];
+  const h = hlById(remaining[0]);
+  const book = BOOKS[h.bookId] || { title: '未分類', author: '', frequency: 1 };
+  const freq = book.frequency ?? 1;
   stage.innerHTML = `
     <article class="qcard">
       <div class="spine"></div>
-      <div class="vtag">${esc(h.source)}</div>
-      <div class="seal">${(h.reviews || 0)}<br>回</div>
-      <blockquote>${esc(h.quote)}</blockquote>
-      <div class="src"><b>${esc(h.source)}</b>${h.author ? ' · ' + esc(h.author) : ''}</div>
+      <div class="vtag">${esc(book.title)}</div>
+      <div class="seal">${(h.srs?.reviewCount || 0)}<br>回</div>
+      <blockquote>${esc(h.text)}</blockquote>
+      <div class="src"><b>${esc(book.title)}</b>${book.author ? ' · ' + esc(book.author) : ''}</div>
       ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
       ${h.note ? '<div class="note">' + esc(h.note) + '</div>' : ''}
       ${h.tags && h.tags.length ? '<div class="tags">' + h.tags.map(t => '<span class="tag">' + esc(t) + '</span>').join('') + '</div>' : ''}
     </article>
     <div class="qactions">
-      <button class="btn fav ${h.fav ? 'on' : ''}" id="fav-btn" aria-label="收藏">${h.fav ? '♥' : '♡'}</button>
+      <button class="btn fav ${h.favorited ? 'on' : ''}" id="fav-btn" aria-label="收藏">${h.favorited ? '♥' : '♡'}</button>
       <button class="btn primary" id="next-btn">已讀,下一句</button>
+    </div>
+    <div class="qactions sub">
+      <button class="btn sm" id="edit-btn">編輯</button>
+      <button class="btn sm" id="discard-btn">移出輪替</button>
+      <button class="btn sm" id="tune-down" title="降低此出處出現頻率">頻率 ↓</button>
+      <button class="btn sm" id="tune-up" title="提高此出處出現頻率">頻率 ↑ ×${freq}</button>
     </div>`;
   $('#next-btn').onclick = async () => {
     try {
-      if (!META.reviewLog[t]) META.reviewLog[t] = { done: [] };
-      if (!META.reviewLog[t].done.includes(h.id)) META.reviewLog[t].done.push(h.id);
-      await updateDoc(doc(db, 'users', USER.uid, 'highlights', h.id), { reviews: (h.reviews || 0) + 1, lastReviewed: t });
-      await saveMeta();
+      // 成功回想 → 半衰期加倍 (§4.3)
+      const half = clamp((h.srs?.halfLife || SRS.initialHalfLife) * SRS.growthFactor, SRS.minHalfLife, SRS.maxHalfLife);
+      await updateDoc(hlRef(h.id), {
+        'srs.halfLife': half,
+        'srs.lastReviewed': serverTimestamp(),
+        'srs.reviewCount': increment(1)
+      });
+      await markDone(h.id);
     } catch (e) { toast('儲存失敗,請重試'); }
   };
   $('#fav-btn').onclick = async () => {
-    try { await updateDoc(doc(db, 'users', USER.uid, 'highlights', h.id), { fav: !h.fav }); }
+    try { await updateDoc(hlRef(h.id), { favorited: !h.favorited }); }
     catch (e) { toast('儲存失敗,請重試'); }
   };
+  $('#discard-btn').onclick = async () => {
+    if (!confirm('移出回顧輪替?(仍會保留在書庫,可隨時恢復)')) return;
+    try {
+      await updateDoc(hlRef(h.id), { discarded: true });
+      await markDone(h.id);
+      toast('已移出輪替');
+    } catch (e) { toast('儲存失敗,請重試'); }
+  };
+  $('#edit-btn').onclick = () => openEditor(h);
+  const tune = async dir => {
+    if (!BOOKS[h.bookId]) { toast('找不到此出處'); return; }
+    const nf = clamp(freq * (dir > 0 ? 2 : 0.5), SRS.minFreq, SRS.maxFreq);
+    try {
+      await updateDoc(bookRef(h.bookId), { frequency: nf });
+      toast('「' + book.title + '」出現頻率 ×' + nf);
+    } catch (e) { toast('儲存失敗,請重試'); }
+  };
+  $('#tune-up').onclick = () => tune(1);
+  $('#tune-down').onclick = () => tune(-1);
 }
-function calcStreak() {
-  let n = 0; const d = new Date();
-  for (;;) {
-    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    if (META.reviewLog[k] && META.reviewLog[k].done.length > 0) { n++; d.setDate(d.getDate() - 1); }
-    else break;
+
+/* ---------- streak 日曆 ---------- */
+function showCalendar() {
+  const hist = META.streak?.history || {};
+  $('#cal-streak').textContent = '連續 ' + calcStreak() + ' 天 · 近 365 天完成 ' + Object.keys(hist).length + ' 天';
+  const now = new Date();
+  let html = '';
+  for (let m = 2; m >= 0; m--) {
+    const first = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    html += '<div class="cal-month"><h4>' + first.getFullYear() + ' 年 ' + (first.getMonth() + 1) + ' 月</h4><div class="cal-grid">';
+    for (let i = 0; i < first.getDay(); i++) html += '<span></span>';
+    for (let day = 1; day <= days; day++) {
+      const key = dateKey(new Date(first.getFullYear(), first.getMonth(), day));
+      html += '<span class="' + (hist[key] ? 'hit' : '') + (key > todayStr() ? ' future' : '') + '">' + day + '</span>';
+    }
+    html += '</div></div>';
   }
-  return n;
+  $('#cal-body').innerHTML = html;
+  $('#cal-overlay').classList.remove('hidden');
 }
+$('#streak-chip').onclick = showCalendar;
+$('#cal-close').onclick = () => $('#cal-overlay').classList.add('hidden');
+$('#cal-overlay').onclick = e => { if (e.target.id === 'cal-overlay') $('#cal-overlay').classList.add('hidden'); };
 
 /* ---------- 書庫 ---------- */
 function renderLibrary() {
   const q = ($('#search').value || '').trim().toLowerCase();
   const list = $('#library-list');
-  let items = HL;
-  if (q) items = items.filter(h =>
-    (h.quote || '').toLowerCase().includes(q) ||
-    (h.source || '').toLowerCase().includes(q) ||
-    (h.author || '').toLowerCase().includes(q) ||
-    (h.note || '').toLowerCase().includes(q) ||
-    (h.tags || []).some(t => t.toLowerCase().includes(q)));
+  let items = HL.filter(h => h.text !== undefined);
+  if (q) items = items.filter(h => {
+    const b = BOOKS[h.bookId];
+    return (h.text || '').toLowerCase().includes(q) ||
+      (b?.title || '').toLowerCase().includes(q) ||
+      (b?.author || '').toLowerCase().includes(q) ||
+      (h.note || '').toLowerCase().includes(q) ||
+      (h.tags || []).some(t => t.toLowerCase().includes(q));
+  });
   if (items.length === 0) {
     list.innerHTML = '<div class="empty"><div class="glyph">庫</div><p>' + (q ? '找不到符合的書摘。' : '書庫還是空的,從「新增」開始。') + '</p></div>';
     return;
   }
   const groups = {};
-  items.forEach(h => { (groups[h.source] = groups[h.source] || []).push(h); });
-  list.innerHTML = Object.keys(groups).sort().map(src => {
-    const g = groups[src];
-    return '<div class="group-title">' + esc(src) + '<small>' + g.length + ' 則</small></div>' +
+  items.forEach(h => { (groups[h.bookId] = groups[h.bookId] || []).push(h); });
+  const bids = Object.keys(groups).sort((a, b) => (BOOKS[a]?.title || '').localeCompare(BOOKS[b]?.title || '', 'zh-Hant'));
+  list.innerHTML = bids.map(bid => {
+    const b = BOOKS[bid] || { title: '未分類', author: '' };
+    const g = groups[bid];
+    const freq = b.frequency ?? 1;
+    return '<div class="group-title">' + esc(b.title) + (b.author ? ' <small>' + esc(b.author) + '</small>' : '') +
+      '<small>' + g.length + ' 則' + (freq !== 1 ? ' · 頻率×' + freq : '') + '</small></div>' +
       g.map(h => `
-      <div class="lcard">
-        <blockquote>${esc(h.quote)}</blockquote>
+      <div class="lcard${h.discarded ? ' discarded' : ''}">
+        <blockquote>${esc(h.text)}</blockquote>
         ${h.url ? '<div class="srclink"><a href="' + esc(h.url) + '" target="_blank" rel="noopener">原文連結 →</a></div>' : ''}
         ${h.note ? '<div class="lnote">' + esc(h.note) + '</div>' : ''}
         <div class="meta">
-          <span>${h.fav ? '♥ ' : ''}回顧 ${(h.reviews || 0)} 次${h.tags && h.tags.length ? ' · ' + h.tags.map(esc).join('、') : ''}</span>
+          <span>${h.favorited ? '♥ ' : ''}回顧 ${(h.srs?.reviewCount || 0)} 次${h.discarded ? ' · 已移出輪替' : ''}${h.tags && h.tags.length ? ' · ' + h.tags.map(esc).join('、') : ''}</span>
           <span class="ops">
+            <button data-fav="${h.id}">${h.favorited ? '取消收藏' : '收藏'}</button>
+            <button data-disc="${h.id}">${h.discarded ? '恢復輪替' : '移出'}</button>
             <button data-edit="${h.id}">編輯</button>
             <button data-del="${h.id}" class="danger">刪除</button>
           </span>
         </div>
       </div>`).join('');
   }).join('');
+  list.querySelectorAll('[data-fav]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.fav); if (!h) return;
+    try { await updateDoc(hlRef(h.id), { favorited: !h.favorited }); }
+    catch (e) { toast('儲存失敗,請重試'); }
+  });
+  list.querySelectorAll('[data-disc]').forEach(b => b.onclick = async () => {
+    const h = hlById(b.dataset.disc); if (!h) return;
+    try {
+      await updateDoc(hlRef(h.id), { discarded: !h.discarded });
+      toast(h.discarded ? '已恢復輪替' : '已移出輪替');
+    } catch (e) { toast('儲存失敗,請重試'); }
+  });
   list.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
     if (confirm('確定刪除這則書摘?')) {
-      try { await deleteDoc(doc(db, 'users', USER.uid, 'highlights', b.dataset.del)); toast('已刪除'); }
-      catch (e) { toast('刪除失敗,請重試'); }
+      const h = hlById(b.dataset.del);
+      try {
+        await deleteDoc(hlRef(b.dataset.del));
+        if (h && BOOKS[h.bookId]) await updateDoc(bookRef(h.bookId), { highlightCount: increment(-1) });
+        toast('已刪除');
+      } catch (e) { toast('刪除失敗,請重試'); }
     }
   });
   list.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
-    const h = HL.find(x => x.id === b.dataset.edit);
-    if (!h) return;
-    editingId = h.id;
-    $('#f-quote').value = h.quote; $('#f-source').value = h.source;
-    $('#f-author').value = h.author || ''; $('#f-note').value = h.note || '';
-    $('#f-tags').value = (h.tags || []).join(', ');
-    $('#save-btn').textContent = '更新書摘';
-    switchView('add');
+    const h = hlById(b.dataset.edit);
+    if (h) openEditor(h);
   });
 }
 
 /* ---------- 新增/編輯 ---------- */
-$('#save-btn').onclick = async () => {
-  const quote = $('#f-quote').value.trim(), source = $('#f-source').value.trim();
-  if (!quote || !source) { toast('請填寫摘錄內容與出處'); return; }
-  const tags = $('#f-tags').value.split(/[,,、]/).map(s => s.trim()).filter(Boolean);
+function openEditor(h) {
+  const book = BOOKS[h.bookId];
+  editingId = h.id;
+  $('#f-quote').value = h.text || '';
+  $('#f-source').value = book?.title || '';
+  $('#f-author').value = book?.author || '';
+  $('#f-note').value = h.note || '';
+  $('#f-tags').value = (h.tags || []).join(', ');
+  $('#save-btn').textContent = '更新書摘';
+  switchView('add');
+}
+async function findOrCreateBook(title, author, sourceUrl) {
+  const ex = Object.values(BOOKS).find(b => b.title === title && (b.author || '') === (author || ''));
+  if (ex) return ex.id;
+  const id = uid();
   const data = {
-    quote, source,
-    author: $('#f-author').value.trim(),
-    note: $('#f-note').value.trim(),
-    tags
+    title, author: author || '', category: sourceUrl ? 'article' : 'book',
+    coverUrl: null, sourceUrl: sourceUrl || null, frequency: 1,
+    highlightCount: 0, createdAt: serverTimestamp()
   };
+  await setDoc(bookRef(id), data);
+  BOOKS[id] = { id, ...data }; // 先寫入本地,避免 snapshot 尚未回來前重複建立
+  return id;
+}
+$('#save-btn').onclick = async () => {
+  const text = $('#f-quote').value.trim(), title = $('#f-source').value.trim();
+  if (!text || !title) { toast('請填寫摘錄內容與出處'); return; }
+  const author = $('#f-author').value.trim();
+  const tags = $('#f-tags').value.split(/[,,、]/).map(s => s.trim()).filter(Boolean);
+  const note = $('#f-note').value.trim();
   try {
     if (editingId) {
-      await updateDoc(doc(db, 'users', USER.uid, 'highlights', editingId), data);
+      const h = hlById(editingId);
+      const oldBook = h ? BOOKS[h.bookId] : null;
+      let bookId = h?.bookId;
+      if (!oldBook || oldBook.title !== title || (oldBook.author || '') !== author) {
+        bookId = await findOrCreateBook(title, author, h?.url);
+        if (oldBook) await updateDoc(bookRef(oldBook.id), { highlightCount: increment(-1) });
+        await updateDoc(bookRef(bookId), { highlightCount: increment(1) });
+      }
+      await updateDoc(hlRef(editingId), { text, note, tags, bookId });
       toast('已更新');
     } else {
-      await setDoc(doc(db, 'users', USER.uid, 'highlights', uid()), {
-        ...data, url: capturedUrl, reviews: 0, fav: false, created: todayStr(), createdAt: serverTimestamp()
+      const bookId = await findOrCreateBook(title, author, capturedUrl);
+      await setDoc(hlRef(uid()), {
+        text, note, tags, bookId, location: null,
+        url: capturedUrl || null, favorited: false, discarded: false,
+        createdAt: serverTimestamp(),
+        srs: { halfLife: SRS.initialHalfLife, lastReviewed: null, reviewCount: 0 }
       });
+      await updateDoc(bookRef(bookId), { highlightCount: increment(1) });
       toast('已存入書庫');
     }
     capturedUrl = '';
@@ -526,18 +869,19 @@ $('#save-btn').onclick = async () => {
     $('#add-form').querySelectorAll('input,textarea').forEach(el => el.value = '');
     $('#save-btn').textContent = '存入書庫';
     switchView('library');
-  } catch (e) { toast('儲存失敗:' + e.code); }
+  } catch (e) { toast('儲存失敗:' + (e.code || e.message)); }
 };
 
-/* ---------- 匯出 ---------- */
+/* ---------- 匯出/設定 ---------- */
 function toMarkdown() {
   const groups = {};
-  HL.forEach(h => { (groups[h.source] = groups[h.source] || []).push(h); });
-  return Object.keys(groups).sort().map(src => {
-    const g = groups[src];
-    let md = '## ' + src + (g[0].author ? ' — ' + g[0].author : '') + '\n\n';
-    g.forEach(h => {
-      md += '> ' + h.quote.replace(/\n/g, '\n> ') + '\n\n';
+  HL.filter(h => h.text !== undefined).forEach(h => { (groups[h.bookId] = groups[h.bookId] || []).push(h); });
+  const bids = Object.keys(groups).sort((a, b) => (BOOKS[a]?.title || '').localeCompare(BOOKS[b]?.title || '', 'zh-Hant'));
+  return bids.map(bid => {
+    const b = BOOKS[bid] || { title: '未分類', author: '' };
+    let md = '## ' + b.title + (b.author ? ' — ' + b.author : '') + '\n\n';
+    groups[bid].forEach(h => {
+      md += '> ' + h.text.replace(/\n/g, '\n> ') + '\n\n';
       if (h.note) md += '筆記:' + h.note + '\n\n';
       if (h.tags && h.tags.length) md += '標籤:' + h.tags.map(t => '#' + t).join(' ') + '\n\n';
     });
@@ -552,12 +896,21 @@ async function copyText(txt, msg) {
   }
 }
 $('#copy-md').onclick = () => copyText(toMarkdown(), 'Markdown 已複製');
-$('#copy-json').onclick = () => copyText(JSON.stringify({ highlights: HL, meta: META }, null, 2), 'JSON 已複製');
+$('#copy-json').onclick = () => copyText(JSON.stringify({ books: Object.values(BOOKS), highlights: HL, meta: META }, null, 2), 'JSON 已複製');
+$('#save-settings').onclick = async () => {
+  const v = clamp(parseInt($('#set-daily').value, 10) || SRS.defaultDaily, 3, 50);
+  $('#set-daily').value = v;
+  if (!META.settings) META.settings = {};
+  META.settings.dailyCount = v;
+  try { await saveMeta(); toast('已儲存,明日回顧生效'); }
+  catch (e) { toast('儲存失敗,請重試'); }
+};
 function renderExport() {
-  const n = HL.length;
-  const srcs = new Set(HL.map(h => h.source)).size;
-  const rv = HL.reduce((s, h) => s + (h.reviews || 0), 0);
-  $('#stats').textContent = n + ' 則書摘 · ' + srcs + ' 個出處 · 累計回顧 ' + rv + ' 次 · 連續 ' + calcStreak() + ' 天';
+  const items = HL.filter(h => h.text !== undefined);
+  const rv = items.reduce((s, h) => s + (h.srs?.reviewCount || 0), 0);
+  $('#stats').textContent = items.length + ' 則書摘 · ' + Object.keys(BOOKS).length + ' 個出處 · 累計回顧 ' + rv + ' 次 · 連續 ' + calcStreak() + ' 天';
+  const inp = $('#set-daily');
+  if (document.activeElement !== inp) inp.value = settings().dailyCount;
 }
 
 /* ---------- 分頁切換 ---------- */
